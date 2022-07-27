@@ -2,18 +2,25 @@
 
 [![pub package](https://img.shields.io/pub/v/ai_barcode_scanner.svg)](https://pub.dev/packages/ai_barcode_scanner)
 
-A universal barcode and QR code scanner for Flutter based on MLKit. Uses CameraX on Android, AVFoundation on iOS and Apple Vision & AVFoundation on macOS.
+A universal AI barcode and QR code scanner for Flutter based on MLKit. Uses CameraX on Android, AVFoundation on iOS and Apple Vision & AVFoundation on macOS.
 
 <table>
   <tr>
-    <td>Video </td>
-     <td>Decoded Address</td>
+    <td>Video</td>
+     <td>Screenshot</td>
   </tr>
   <tr>
-<td><img src="https://raw.githubusercontent.com/rvndsngwn/map_location_picker/master/assets/GIF_4300.gif" width=270 height=480 alt=""></td>
-<td><img src="https://raw.githubusercontent.com/rvndsngwn/map_location_picker/master/assets/IMG_2480.PNG" width=270 height=480 alt=""></td>
+<td><img src="https://raw.githubusercontent.com/mohesu/barcode_scanner/master/assets/final.gif" width=270 height=480 alt=""></td>
+<td><img src="https://raw.githubusercontent.com/mohesu/barcode_scanner/master/assets/final.PNG" width=270 height=480 alt=""></td>
 </tr>
 </table>
+
+### Note:  
+_This plugin is based on the [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin by [steenbakker.dev](https://pub.dev/publishers/steenbakker.dev/packages)._
+
+_I recommend you to read the [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin's documentation._
+
+
 
 ### Android
 SDK 21 and newer. Reason: CameraX requires at least SDK 21.
@@ -61,15 +68,15 @@ If you don't set allowDuplicates to false, you can get multiple scans in a very 
 import 'package:ai_barcode_scanner/ai_barcode_scanner.dart';
 
 /// Simple example of using the barcode scanner.
-BarcodeScanner(
+AiBarcodeScanner(
         onScan: (String value) {
           debugPrint(value);
         },
       ),
 
 /// Example of using the barcode scanner with a controller.
-BarcodeScanner(
-        controller: BarcodeScannerController(),
+AiBarcodeScanner(
+        controller: MobileScannerController(),
           onScan: (String value) {
             debugPrint(value);
           },
@@ -78,7 +85,7 @@ BarcodeScanner(
 /// Example of using the barcode scanner with validation.
 /// Validator works on the raw string, not the decoded value.
 /// If you want to validate the scanner, use the [validateText] and [validateType] parameters.
-BarcodeScanner(
+AiBarcodeScanner(
         validateText: 'https://',
         validateType: ValidateType.startsWith,
         controller: BarcodeScannerController(),
@@ -188,6 +195,6 @@ BarcodeScanner(
 ```
 
 ## Thanks to
-This plugin is based on the [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin by [steenbakker.dev](https://pub.dev/publishers/steenbakker.dev/packages).
+The [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin by [steenbakker.dev](https://pub.dev/publishers/steenbakker.dev/packages).
 
 I recommend you to read the [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin's documentation.
