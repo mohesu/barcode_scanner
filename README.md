@@ -10,8 +10,8 @@ A universal AI barcode and QR code scanner for Flutter based on MLKit. Uses Came
      <td>Screenshot</td>
   </tr>
   <tr>
-<td><img src="https://raw.githubusercontent.com/mohesu/barcode_scanner/master/assets/final.gif" width=270 height=480 alt=""></td>
-<td><img src="https://raw.githubusercontent.com/mohesu/barcode_scanner/master/assets/final.PNG" width=270 height=480 alt=""></td>
+<td><img src="https://raw.githubusercontent.com/mohesu/barcode_scanner/master/assets/final.gif" width=250 height=480 alt=""></td>
+<td><img src="https://raw.githubusercontent.com/mohesu/barcode_scanner/master/assets/final.PNG" width=250 height=480 alt=""></td>
 </tr>
 </table>
 
@@ -88,7 +88,6 @@ AiBarcodeScanner(
 AiBarcodeScanner(
         validateText: 'https://',
         validateType: ValidateType.startsWith,
-        controller: BarcodeScannerController(),
           onScan: (String value) {
             debugPrint(value);
           },
