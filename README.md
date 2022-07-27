@@ -4,11 +4,16 @@
 
 A universal barcode and QR code scanner for Flutter based on MLKit. Uses CameraX on Android, AVFoundation on iOS and Apple Vision & AVFoundation on macOS.
 
-## Platform Support
-
-| Android | iOS | MacOS | Web | Linux | Windows |
-| :-----: | :-: | :---: | :-: | :---: | :-----: |
-|   ✔️    | ✔️   |  ✔️  | ✔️  |     |      |
+<table>
+  <tr>
+    <td>Video </td>
+     <td>Decoded Address</td>
+  </tr>
+  <tr>
+<td><img src="https://raw.githubusercontent.com/rvndsngwn/map_location_picker/master/assets/GIF_4300.gif" width=270 height=480 alt=""></td>
+<td><img src="https://raw.githubusercontent.com/rvndsngwn/map_location_picker/master/assets/IMG_2480.PNG" width=270 height=480 alt=""></td>
+</tr>
+</table>
 
 ### Android
 SDK 21 and newer. Reason: CameraX requires at least SDK 21.
