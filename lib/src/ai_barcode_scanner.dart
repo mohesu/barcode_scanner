@@ -112,10 +112,10 @@ class AiBarcodeScanner extends StatefulWidget {
     this.controller,
     this.onDetect,
     this.borderColor = Colors.white,
-    this.borderWidth = 10,
+    this.borderWidth = 8,
     this.overlayColor = const Color.fromRGBO(0, 0, 0, 80),
-    this.borderRadius = 10,
-    this.borderLength = 30,
+    this.borderRadius = 8,
+    this.borderLength = 36,
     this.cutOutSize = 300,
     this.cutOutWidth,
     this.cutOutHeight,
@@ -196,7 +196,7 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                 HapticFeedback.mediumImpact();
               }
               final String code = barcode.rawValue!;
-              debugPrint('Barcode found => $code');
+              debugPrint('Barcode rawValue => $code');
               widget.onScan(code);
               setState(() {});
               if (widget.canPop) {

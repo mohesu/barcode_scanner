@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 class OverlayShape extends ShapeBorder {
   OverlayShape({
     this.borderColor = Colors.red,
-    this.borderWidth = 3.0,
+    this.borderWidth = 4.0,
     this.overlayColor = const Color.fromRGBO(0, 0, 0, 80),
     this.borderRadius = 0,
-    this.borderLength = 40,
+    this.borderLength = 42,
     double? cutOutSize,
     double? cutOutWidth,
     double? cutOutHeight,
