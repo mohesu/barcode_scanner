@@ -1,3 +1,7 @@
+## 0.0.2
+- Dependency updates
+- mobile_scanner: ^3.0.0-beta.1
+
 ## 0.0.1+1
 
 * Documentation updated

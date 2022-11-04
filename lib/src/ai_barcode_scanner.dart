@@ -14,7 +14,8 @@ class AiBarcodeScanner extends StatefulWidget {
   ///
   /// [barcode] The barcode object with all information about the scanned code.
   /// [args] Information about the state of the MobileScanner widget
-  final Function(Barcode barcode, MobileScannerArguments? args)? onDetect;
+  final Function(BarcodeCapture barcode, MobileScannerArguments? args)?
+      onDetect;
 
   /// Validate barcode text with [ValidateType]
   /// [validateText] and [validateType] must be set together.
@@ -102,6 +103,10 @@ class AiBarcodeScanner extends StatefulWidget {
   /// Can auto back to previous page when barcode is successfully scanned (default: true)
   final bool canPop;
 
+  final bool autoResume;
+
+  final dynamic Function(bool)? onPermissionSet;
+
   const AiBarcodeScanner({
     Key? key,
     required this.onScan,
@@ -124,9 +129,7 @@ class AiBarcodeScanner extends StatefulWidget {
     this.hintText = 'Scan QR Code',
     this.hintMargin = const EdgeInsets.all(16),
     this.hintBackgroundColor,
-    this.hintTextStyle = const TextStyle(
-      fontWeight: FontWeight.bold,
-    ),
+    this.hintTextStyle = const TextStyle(fontWeight: FontWeight.bold),
     this.hintPadding = const EdgeInsets.all(0),
     this.showOverlay = true,
     this.showError = true,
@@ -136,6 +139,8 @@ class AiBarcodeScanner extends StatefulWidget {
     this.successColor = Colors.green,
     this.successText = 'BarCode Found',
     this.canPop = true,
+    this.autoResume = true,
+    this.onPermissionSet,
   })  : assert(validateText == null || validateType != null),
         assert(validateText != null || validateType == null),
         super(key: key);
@@ -171,20 +176,21 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
           MobileScanner(
             controller: controller,
             fit: widget.fit,
-            allowDuplicates: widget.allowDuplicates,
+            autoResume: widget.autoResume,
+            onPermissionSet: widget.onPermissionSet,
             onDetect: (barcode, args) {
               widget.onDetect?.call(barcode, args);
-              if (barcode.rawValue?.isEmpty ?? true) {
+              if (barcode.barcodes.isEmpty) {
                 debugPrint('Failed to scan Barcode');
                 return;
               }
               if (widget.validateText?.isNotEmpty ?? false) {
                 if (!widget.validateType!.toValidateTypeBool(
-                    barcode.rawValue!, widget.validateText!)) {
+                    barcode.barcodes.first.rawValue!, widget.validateText!)) {
                   if (!widget.allowDuplicates) {
                     HapticFeedback.vibrate();
                   }
-                  final String code = barcode.rawValue!;
+                  final String code = barcode.barcodes.first.rawValue!;
                   debugPrint('Invalid Barcode => $code');
                   _isSuccess = false;
                   setState(() {});
@@ -195,11 +201,11 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
               if (!widget.allowDuplicates) {
                 HapticFeedback.mediumImpact();
               }
-              final String code = barcode.rawValue!;
+              final String code = barcode.barcodes.first.rawValue!;
               debugPrint('Barcode found => $code');
               widget.onScan(code);
               setState(() {});
-              if (widget.canPop) {
+              if (widget.canPop && mounted) {
                 Navigator.pop(context);
               }
             },
@@ -259,7 +265,7 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                     ),
                     trailing: IconButton(
                       tooltip: "Torch",
-                      onPressed: controller.hasTorch
+                      onPressed: controller.torchEnabled
                           ? () => controller.toggleTorch()
                           : null,
                       icon: ValueListenableBuilder<TorchState>(
