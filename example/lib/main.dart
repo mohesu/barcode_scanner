@@ -25,12 +25,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String barcode = 'Tap on button to scan';
+  String barcode = 'Tap  to scan';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Barcode Scanner'),
+        title: const Text(' Scanner'),
       ),
       body: Center(
         child: Column(
@@ -42,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => AiBarcodeScanner(
-                      validateText: 'https://',
+                      validateText: 'https://', // link to be validated
                       validateType: ValidateType.startsWith,
                       onScan: (String value) {
                         debugPrint(value);
