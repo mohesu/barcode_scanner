@@ -7,7 +7,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.0.2"
+    version: "0.0.2+1"
   async:
     dependency: transitive
     description:
@@ -117,12 +117,10 @@ packages:
   mobile_scanner:
     dependency: transitive
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "99232c9687acea1e9b8436aa0df022f93ce25300"
-      url: "git@github.com:juliansteenbakker/mobile_scanner.git"
-    source: git
-    version: "3.0.0-beta.1"
+      name: mobile_scanner
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
   path:
     dependency: transitive
     description:

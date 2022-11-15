@@ -176,8 +176,8 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
           MobileScanner(
             controller: controller,
             fit: widget.fit,
-            autoResume: widget.autoResume,
-            onPermissionSet: widget.onPermissionSet,
+            allowDuplicates: widget.allowDuplicates,
+            key: widget.key,
             onDetect: (barcode, args) {
               widget.onDetect?.call(barcode, args);
               if (barcode.barcodes.isEmpty) {

@@ -42,13 +42,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => AiBarcodeScanner(
-                      validateText: 'https://', // link to be validated
-                      validateType: ValidateType.startsWith,
+                      //    validateText: 'https://', // link to be validated
+                      //   validateType: ValidateType.startsWith,
                       onScan: (String value) {
-                        debugPrint(value);
-                        setState(() {
-                          barcode = value;
-                        });
+                        // debugPrint(value);
+                        // setState(() {
+                        //   barcode = value;
+                        // });
+                      },
+                      canPop: false,
+                      onDetect: ( barcode, args) {
+                        debugPrint(barcode.barcodes.first.rawValue!);
                       },
                     ),
                   ),

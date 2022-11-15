@@ -1,5 +1,3 @@
-// ignore_for_file: no_leading_underscores_for_local_identifiers, duplicate_ignore
-
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -64,14 +62,14 @@ class OverlayShape extends ShapeBorder {
 
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    Path _getLeftTopPath(Rect rect) {
+    Path getLeftTopPath(Rect rect) {
       return Path()
         ..moveTo(rect.left, rect.bottom)
         ..lineTo(rect.left, rect.top)
         ..lineTo(rect.right, rect.top);
     }
 
-    return _getLeftTopPath(rect)
+    return getLeftTopPath(rect)
       ..lineTo(
         rect.right,
         rect.bottom,
@@ -87,20 +85,17 @@ class OverlayShape extends ShapeBorder {
   }
 
   @override
-  // ignore: duplicate_ignore
   void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
     final width = rect.width;
     final borderWidthSize = width / 2;
     final height = rect.height;
     final borderOffset = borderWidth / 2;
-    // ignore: no_leading_underscores_for_local_identifiers
-    final _borderLength =
+    final bLength =
         borderLength > min(cutOutHeight, cutOutHeight) / 2 + borderWidth * 2
             ? borderWidthSize / 2
             : borderLength;
-    final _cutOutWidth =
-        cutOutWidth < width ? cutOutWidth : width - borderOffset;
-    final _cutOutHeight =
+    final cutWidth = cutOutWidth < width ? cutOutWidth : width - borderOffset;
+    final cutHeight =
         cutOutHeight < height ? cutOutHeight : height - borderOffset;
 
     final backgroundPaint = Paint()
@@ -118,14 +113,14 @@ class OverlayShape extends ShapeBorder {
       ..blendMode = BlendMode.dstOut;
 
     final cutOutRect = Rect.fromLTWH(
-      rect.left + width / 2 - _cutOutWidth / 2 + borderOffset,
+      rect.left + width / 2 - cutWidth / 2 + borderOffset,
       -cutOutBottomOffset +
           rect.top +
           height / 2 -
-          _cutOutHeight / 2 +
+          cutHeight / 2 +
           borderOffset,
-      _cutOutWidth - borderOffset * 2,
-      _cutOutHeight - borderOffset * 2,
+      cutWidth - borderOffset * 2,
+      cutHeight - borderOffset * 2,
     );
 
     canvas
@@ -141,10 +136,10 @@ class OverlayShape extends ShapeBorder {
       /// Draw top right corner
       ..drawRRect(
         RRect.fromLTRBAndCorners(
-          cutOutRect.right - _borderLength,
+          cutOutRect.right - bLength,
           cutOutRect.top,
           cutOutRect.right,
-          cutOutRect.top + _borderLength,
+          cutOutRect.top + bLength,
           topRight: Radius.circular(borderRadius),
         ),
         borderPaint,
@@ -155,8 +150,8 @@ class OverlayShape extends ShapeBorder {
         RRect.fromLTRBAndCorners(
           cutOutRect.left,
           cutOutRect.top,
-          cutOutRect.left + _borderLength,
-          cutOutRect.top + _borderLength,
+          cutOutRect.left + bLength,
+          cutOutRect.top + bLength,
           topLeft: Radius.circular(borderRadius),
         ),
         borderPaint,
@@ -165,8 +160,8 @@ class OverlayShape extends ShapeBorder {
       /// Draw bottom right corner
       ..drawRRect(
         RRect.fromLTRBAndCorners(
-          cutOutRect.right - _borderLength,
-          cutOutRect.bottom - _borderLength,
+          cutOutRect.right - bLength,
+          cutOutRect.bottom - bLength,
           cutOutRect.right,
           cutOutRect.bottom,
           bottomRight: Radius.circular(borderRadius),
@@ -178,8 +173,8 @@ class OverlayShape extends ShapeBorder {
       ..drawRRect(
         RRect.fromLTRBAndCorners(
           cutOutRect.left,
-          cutOutRect.bottom - _borderLength,
-          cutOutRect.left + _borderLength,
+          cutOutRect.bottom - bLength,
+          cutOutRect.left + bLength,
           cutOutRect.bottom,
           bottomLeft: Radius.circular(borderRadius),
         ),

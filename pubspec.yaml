@@ -12,9 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  mobile_scanner:
-    git:
-      url: git@github.com:juliansteenbakker/mobile_scanner.git
+  mobile_scanner: ^2.0.0
 
 dev_dependencies:
   flutter_test:
