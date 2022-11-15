@@ -1,3 +1,6 @@
+## 0.0.2+1
+- multi scan bug fixed
+
 ## 0.0.2
 - Dependency updates
 - mobile_scanner: ^3.0.0-beta.1
