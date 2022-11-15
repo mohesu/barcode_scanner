@@ -14,8 +14,7 @@ class AiBarcodeScanner extends StatefulWidget {
   ///
   /// [barcode] The barcode object with all information about the scanned code.
   /// [args] Information about the state of the MobileScanner widget
-  final Function(BarcodeCapture barcode, MobileScannerArguments? args)?
-      onDetect;
+  final Function(Barcode barcode, MobileScannerArguments? args)? onDetect;
 
   /// Validate barcode text with [ValidateType]
   /// [validateText] and [validateType] must be set together.
@@ -117,10 +116,10 @@ class AiBarcodeScanner extends StatefulWidget {
     this.controller,
     this.onDetect,
     this.borderColor = Colors.white,
-    this.borderWidth = 8,
+    this.borderWidth = 10,
     this.overlayColor = const Color.fromRGBO(0, 0, 0, 80),
-    this.borderRadius = 8,
-    this.borderLength = 36,
+    this.borderRadius = 10,
+    this.borderLength = 40,
     this.cutOutSize = 300,
     this.cutOutWidth,
     this.cutOutHeight,
@@ -180,17 +179,17 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
             key: widget.key,
             onDetect: (barcode, args) {
               widget.onDetect?.call(barcode, args);
-              if (barcode.barcodes.isEmpty) {
+              if (barcode.rawValue?.isEmpty ?? true) {
                 debugPrint('Failed to scan Barcode');
                 return;
               }
               if (widget.validateText?.isNotEmpty ?? false) {
                 if (!widget.validateType!.toValidateTypeBool(
-                    barcode.barcodes.first.rawValue!, widget.validateText!)) {
+                    barcode.rawValue!, widget.validateText!)) {
                   if (!widget.allowDuplicates) {
                     HapticFeedback.vibrate();
                   }
-                  final String code = barcode.barcodes.first.rawValue!;
+                  final String code = barcode.rawValue!;
                   debugPrint('Invalid Barcode => $code');
                   _isSuccess = false;
                   setState(() {});
@@ -201,8 +200,8 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
               if (!widget.allowDuplicates) {
                 HapticFeedback.mediumImpact();
               }
-              final String code = barcode.barcodes.first.rawValue!;
-              debugPrint('Barcode found => $code');
+              final String code = barcode.rawValue!;
+              debugPrint('Barcode rawValue => $code');
               widget.onScan(code);
               setState(() {});
               if (widget.canPop && mounted) {
@@ -265,9 +264,7 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                     ),
                     trailing: IconButton(
                       tooltip: "Torch",
-                      onPressed: controller.torchEnabled
-                          ? () => controller.toggleTorch()
-                          : null,
+                      onPressed: () => controller.toggleTorch(),
                       icon: ValueListenableBuilder<TorchState>(
                         valueListenable: controller.torchState,
                         builder: (context, state, child) {

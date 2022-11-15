@@ -45,14 +45,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       //    validateText: 'https://', // link to be validated
                       //   validateType: ValidateType.startsWith,
                       onScan: (String value) {
-                        // debugPrint(value);
-                        // setState(() {
-                        //   barcode = value;
-                        // });
-                      },
-                      canPop: false,
-                      onDetect: ( barcode, args) {
-                        debugPrint(barcode.barcodes.first.rawValue!);
+                        debugPrint(value);
+                        setState(() {
+                          barcode = value;
+                        });
                       },
                     ),
                   ),
