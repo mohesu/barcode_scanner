@@ -1,5 +1,4 @@
-## 0.0.3
-
+## 0.0.4
 - mobile_scanner: ^3.0.0 added
 - [#25](https://github.com/mohesu/barcode_scanner/issues/25) fixed
 - [#32](https://github.com/mohesu/barcode_scanner/issues/32) added, Thanks to @Abhinav-Satija
