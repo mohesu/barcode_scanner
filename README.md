@@ -2,7 +2,13 @@
 
 [![pub package](https://img.shields.io/pub/v/ai_barcode_scanner.svg)](https://pub.dev/packages/ai_barcode_scanner)
 
-A universal AI barcode and QR code scanner for Flutter based on MLKit. Uses CameraX on Android, AVFoundation on iOS and Apple Vision & AVFoundation on macOS.
+AI barcode and QR code scanner for Flutter based on MLKit. Uses CameraX on Android, AVFoundation on iOS and Apple Vision & AVFoundation on macOS based on [mobile_scanner](https://pub.dev/packages/mobile_scanner).
+
+## Platform Support
+
+| Android | iOS | macOS | Web | Linux | Windows |
+| ------- | --- | ----- | --- | ----- | ------- |
+| ✔       | ✔   | ✔     | ✔   | :x:   | :x:     |
 
 <table>
   <tr>
@@ -15,14 +21,14 @@ A universal AI barcode and QR code scanner for Flutter based on MLKit. Uses Came
 </tr>
 </table>
 
-### Note:  
+### Note:
+
 _This plugin is based on the [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin by [steenbakker.dev](https://pub.dev/publishers/steenbakker.dev/packages)._
 
 _I recommend you to read the [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin's documentation._
 
-
-
 ### Android
+
 SDK 21 and newer. Reason: CameraX requires at least SDK 21.
 Also, make sure you upgrade kotlin to the latest version in your project.
 
@@ -33,6 +39,7 @@ To use this version you must alter the ai_barcode_scanner gradle file to replace
 [You can read more about the difference between the two versions here.](https://developers.google.com/ml-kit/vision/barcode-scanning/android)
 
 ### iOS
+
 iOS 11 and newer. Reason: MLKit for iOS requires at least iOS 10 and a [64bit device](https://developers.google.com/ml-kit/migration/ios).
 
 **Add the following keys to your Info.plist file, located in <project root>/ios/Runner/Info.plist:**
@@ -44,9 +51,11 @@ NSCameraUsageDescription - describe why your app needs access to the camera. Thi
 NSPhotoLibraryUsageDescription - describe why your app needs permission for the photo library. This is called Privacy - Photo Library Usage Description in the visual editor.
 
 ### macOS
+
 macOS 10.13 or newer. Reason: Apple Vision library.
 
 ### Web
+
 Add this to `web/index.html`:
 
 ```html
@@ -63,7 +72,7 @@ Import `package:ai_barcode_scanner/ai_barcode_scanner.dart`, and use the widget 
 If you don't provide a controller, you can't control functions like the torch(flash) or switching camera.
 
 If you don't set allowDuplicates to false, you can get multiple scans in a very short time, causing things like pop() to fire lots of times.
-    
+
 ```dart
 import 'package:ai_barcode_scanner/ai_barcode_scanner.dart';
 
@@ -94,21 +103,58 @@ AiBarcodeScanner(
       ),
 ```
 
+### BarcodeCapture
+
+The onDetect function returns a BarcodeCapture objects which contains the following items.
+
+| Property name | Type          | Description                       |
+| ------------- | ------------- | --------------------------------- |
+| barcodes      | List<Barcode> | A list with scanned barcodes.     |
+| image         | Uint8List?    | If enabled, an image of the scan. |
+
+You can use the following properties of the Barcode object.
+
+| Property name | Type           | Description                         |
+| ------------- | -------------- | ----------------------------------- |
+| format        | BarcodeFormat  |                                     |
+| rawBytes      | Uint8List?     | binary scan result                  |
+| rawValue      | String?        | Value if barcode is in UTF-8 format |
+| displayValue  | String?        |                                     |
+| type          | BarcodeType    |                                     |
+| calendarEvent | CalendarEvent? |                                     |
+| contactInfo   | ContactInfo?   |                                     |
+| driverLicense | DriverLicense? |                                     |
+| email         | Email?         |                                     |
+| geoPoint      | GeoPoint?      |                                     |
+| phone         | Phone?         |                                     |
+| sms           | SMS?           |                                     |
+| url           | UrlBookmark?   |                                     |
+| wifi          | WiFi?          | WiFi Access-Point details           |
+
+## Thanks to
+
+The [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin by [steenbakker.dev](https://pub.dev/publishers/steenbakker.dev/packages).
+
+This package depends on [mobile_scanner](https://pub.dev/packages/mobile_scanner)
+
+I recommend you to read the [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin's documentation.
+
 ### Parameters of the widget
 
 ```dart
   /// Function that gets Called when barcode is scanned successfully
+  ///
   final void Function(String) onScan;
 
   /// Function that gets called when a Barcode is detected.
   ///
   /// [barcode] The barcode object with all information about the scanned code.
   /// [args] Information about the state of the MobileScanner widget
-  final Function(Barcode barcode, MobileScannerArguments? args)? onDetect;
+  final void Function(BarcodeCapture)? onDetect;
 
   /// Validate barcode text with [ValidateType]
   /// [validateText] and [validateType] must be set together.
-  final String? validateText;
+  final String validateText;
 
   /// Validate type [ValidateType]
   /// Validator working with single string value only.
@@ -153,8 +199,10 @@ AiBarcodeScanner(
   /// Overlay cut out size (default: 300)
   final double cutOutSize;
 
-  /// Show hint or not (default: true)
-  final bool showHint;
+  /// Hint widget (optional) (default: Text('Scan QR Code'))
+  /// Hint widget will be replaced the bottom of the screen.
+  /// If you want to replace the bottom screen widget, use [hintWidget]
+  final Widget? hintWidget;
 
   /// Hint text (default: 'Scan QR Code')
   final String hintText;
@@ -191,9 +239,34 @@ AiBarcodeScanner(
 
   /// Can auto back to previous page when barcode is successfully scanned (default: true)
   final bool canPop;
+
+  /// The function that builds an error widget when the scanner
+  /// could not be started.
+  ///
+  /// If this is null, defaults to a black [ColoredBox]
+  /// with a centered white [Icons.error] icon.
+  final Widget Function(BuildContext, MobileScannerException, Widget?)?
+      errorBuilder;
+
+  /// The function that builds a placeholder widget when the scanner
+  /// is not yet displaying its camera preview.
+  ///
+  /// If this is null, a black [ColoredBox] is used as placeholder.
+  final Widget Function(BuildContext, Widget?)? placeholderBuilder;
+
+  ///The function that signals when the barcode scanner is started.
+  final void Function(MobileScannerArguments?)? onScannerStarted;
+
+  /// if set barcodes will only be scanned if they fall within this [Rect]
+  /// useful for having a cut-out overlay for example. these [Rect]
+  /// coordinates are relative to the widget size, so by how much your
+  /// rectangle overlays the actual image can depend on things like the
+  /// [BoxFit]
+  final Rect? scanWindow;
+
+  /// Only set this to true if you are starting another instance of mobile_scanner
+  /// right after disposing the first one, like in a PageView.
+  ///
+  /// Default: false
+  final bool? startDelay;
 ```
-
-## Thanks to
-The [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin by [steenbakker.dev](https://pub.dev/publishers/steenbakker.dev/packages).
-
-I recommend you to read the [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin's documentation.

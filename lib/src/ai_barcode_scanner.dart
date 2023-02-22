@@ -8,17 +8,18 @@ import 'overlay.dart';
 /// Barcode scanner widget
 class AiBarcodeScanner extends StatefulWidget {
   /// Function that gets Called when barcode is scanned successfully
+  ///
   final void Function(String) onScan;
 
   /// Function that gets called when a Barcode is detected.
   ///
   /// [barcode] The barcode object with all information about the scanned code.
   /// [args] Information about the state of the MobileScanner widget
-  final Function(Barcode barcode, MobileScannerArguments? args)? onDetect;
+  final void Function(BarcodeCapture)? onDetect;
 
   /// Validate barcode text with [ValidateType]
   /// [validateText] and [validateType] must be set together.
-  final String? validateText;
+  final String validateText;
 
   /// Validate type [ValidateType]
   /// Validator working with single string value only.
@@ -63,8 +64,10 @@ class AiBarcodeScanner extends StatefulWidget {
   /// Overlay cut out size (default: 300)
   final double cutOutSize;
 
-  /// Show hint or not (default: true)
-  final bool showHint;
+  /// Hint widget (optional) (default: Text('Scan QR Code'))
+  /// Hint widget will be replaced the bottom of the screen.
+  /// If you want to replace the bottom screen widget, use [hintWidget]
+  final Widget? hintWidget;
 
   /// Hint text (default: 'Scan QR Code')
   final String hintText;
@@ -102,14 +105,40 @@ class AiBarcodeScanner extends StatefulWidget {
   /// Can auto back to previous page when barcode is successfully scanned (default: true)
   final bool canPop;
 
-  final bool autoResume;
+  /// The function that builds an error widget when the scanner
+  /// could not be started.
+  ///
+  /// If this is null, defaults to a black [ColoredBox]
+  /// with a centered white [Icons.error] icon.
+  final Widget Function(BuildContext, MobileScannerException, Widget?)?
+      errorBuilder;
 
-  final dynamic Function(bool)? onPermissionSet;
+  /// The function that builds a placeholder widget when the scanner
+  /// is not yet displaying its camera preview.
+  ///
+  /// If this is null, a black [ColoredBox] is used as placeholder.
+  final Widget Function(BuildContext, Widget?)? placeholderBuilder;
+
+  ///The function that signals when the barcode scanner is started.
+  final void Function(MobileScannerArguments?)? onScannerStarted;
+
+  /// if set barcodes will only be scanned if they fall within this [Rect]
+  /// useful for having a cut-out overlay for example. these [Rect]
+  /// coordinates are relative to the widget size, so by how much your
+  /// rectangle overlays the actual image can depend on things like the
+  /// [BoxFit]
+  final Rect? scanWindow;
+
+  /// Only set this to true if you are starting another instance of mobile_scanner
+  /// right after disposing the first one, like in a PageView.
+  ///
+  /// Default: false
+  final bool? startDelay;
 
   const AiBarcodeScanner({
     Key? key,
     required this.onScan,
-    this.validateText,
+    this.validateText = '',
     this.validateType,
     this.allowDuplicates = false,
     this.fit = BoxFit.cover,
@@ -124,10 +153,9 @@ class AiBarcodeScanner extends StatefulWidget {
     this.cutOutWidth,
     this.cutOutHeight,
     this.cutOutBottomOffset = 0,
-    this.showHint = true,
     this.hintText = 'Scan QR Code',
-    this.hintMargin = const EdgeInsets.all(16),
-    this.hintBackgroundColor,
+    this.hintMargin = const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+    this.hintBackgroundColor = Colors.white,
     this.hintTextStyle = const TextStyle(fontWeight: FontWeight.bold),
     this.hintPadding = const EdgeInsets.all(0),
     this.showOverlay = true,
@@ -138,9 +166,13 @@ class AiBarcodeScanner extends StatefulWidget {
     this.successColor = Colors.green,
     this.successText = 'BarCode Found',
     this.canPop = true,
-    this.autoResume = true,
-    this.onPermissionSet,
-  })  : assert(validateText == null || validateType != null),
+    this.errorBuilder,
+    this.placeholderBuilder,
+    this.onScannerStarted,
+    this.scanWindow,
+    this.startDelay,
+    this.hintWidget,
+  })  : assert(validateType != null),
         assert(validateText != null || validateType == null),
         super(key: key);
 
@@ -169,27 +201,58 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
 
   @override
   Widget build(BuildContext context) {
+    /// keeps the app in portrait mode
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     return Scaffold(
       body: Stack(
         children: [
           MobileScanner(
             controller: controller,
             fit: widget.fit,
-            allowDuplicates: widget.allowDuplicates,
+            errorBuilder: widget.errorBuilder ??
+                (context, error, child) {
+                  return ColoredBox(
+                    color: Colors.black,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(
+                            Icons.no_photography,
+                            color: Colors.white,
+                            size: 100,
+                          ),
+                          SizedBox(height: 20),
+                          Text(
+                            "Failed to load camera.",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+            onScannerStarted: widget.onScannerStarted,
+            placeholderBuilder: widget.placeholderBuilder,
+            scanWindow: widget.scanWindow,
+            startDelay: widget.startDelay ?? false,
             key: widget.key,
-            onDetect: (barcode, args) {
-              widget.onDetect?.call(barcode, args);
-              if (barcode.rawValue?.isEmpty ?? true) {
+            onDetect: (BarcodeCapture barcode) async {
+              widget.onDetect?.call(barcode);
+              if (barcode.barcodes.isEmpty) {
                 debugPrint('Failed to scan Barcode');
                 return;
               }
-              if (widget.validateText?.isNotEmpty ?? false) {
+              if (widget.validateText.isNotEmpty) {
                 if (!widget.validateType!.toValidateTypeBool(
-                    barcode.rawValue!, widget.validateText!)) {
-                  if (!widget.allowDuplicates) {
-                    HapticFeedback.vibrate();
-                  }
-                  final String code = barcode.rawValue!;
+                    barcode.barcodes.first.rawValue ?? "",
+                    widget.validateText)) {
+                  HapticFeedback.heavyImpact();
+                  final String code = barcode.barcodes.first.rawValue!;
                   debugPrint('Invalid Barcode => $code');
                   _isSuccess = false;
                   setState(() {});
@@ -197,14 +260,12 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                 }
               }
               _isSuccess = true;
-              if (!widget.allowDuplicates) {
-                HapticFeedback.mediumImpact();
-              }
-              final String code = barcode.rawValue!;
+              HapticFeedback.lightImpact();
+              final String code = barcode.barcodes.first.rawValue!;
               debugPrint('Barcode rawValue => $code');
               widget.onScan(code);
               setState(() {});
-              if (widget.canPop && mounted) {
+              if (widget.canPop && mounted && Navigator.canPop(context)) {
                 Navigator.pop(context);
               }
             },
@@ -225,68 +286,72 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                   cutOutBottomOffset: widget.cutOutBottomOffset,
                   cutOutWidth: widget.cutOutWidth,
                   cutOutHeight: widget.cutOutHeight,
-                  overlayColor: widget.overlayColor,
+                  overlayColor: ((_isSuccess ?? false) && widget.showSuccess)
+                      ? widget.successColor.withOpacity(0.4)
+                      : (!(_isSuccess ?? true) && widget.showError)
+                          ? widget.errorColor.withOpacity(0.4)
+                          : widget.overlayColor,
                 ),
               ),
             ),
-          if (widget.showHint)
-            SafeArea(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Card(
-                  color: widget.hintBackgroundColor,
-                  margin: widget.hintMargin,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(widget.borderRadius),
-                  ),
-                  child: ListTile(
-                    contentPadding: widget.hintPadding,
-                    leading: IconButton(
-                      color: Theme.of(context).primaryColor,
-                      tooltip: "Switch Camera",
-                      onPressed: () => controller.switchCamera(),
-                      icon: ValueListenableBuilder<CameraFacing>(
-                        valueListenable: controller.cameraFacingState,
-                        builder: (context, state, child) {
-                          switch (state) {
-                            case CameraFacing.front:
-                              return const Icon(Icons.camera_front);
-                            case CameraFacing.back:
-                              return const Icon(Icons.camera_rear);
-                          }
-                        },
+          widget.hintWidget ??
+              SafeArea(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    margin: widget.hintMargin,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(widget.borderRadius),
+                      color: widget.hintBackgroundColor,
+                    ),
+                    child: ListTile(
+                      contentPadding: widget.hintPadding,
+                      leading: IconButton(
+                        color: Theme.of(context).primaryColor,
+                        tooltip: "Switch Camera",
+                        onPressed: () => controller.switchCamera(),
+                        icon: ValueListenableBuilder<CameraFacing>(
+                          valueListenable: controller.cameraFacingState,
+                          builder: (context, state, child) {
+                            switch (state) {
+                              case CameraFacing.front:
+                                return const Icon(Icons.camera_front);
+                              case CameraFacing.back:
+                                return const Icon(Icons.camera_rear);
+                            }
+                          },
+                        ),
                       ),
-                    ),
-                    title: Text(
-                      widget.hintText,
-                      textAlign: TextAlign.center,
-                      style: widget.hintTextStyle,
-                    ),
-                    trailing: IconButton(
-                      tooltip: "Torch",
-                      onPressed: () => controller.toggleTorch(),
-                      icon: ValueListenableBuilder<TorchState>(
-                        valueListenable: controller.torchState,
-                        builder: (context, state, child) {
-                          switch (state) {
-                            case TorchState.off:
-                              return const Icon(
-                                Icons.flash_off,
-                                color: Colors.grey,
-                              );
-                            case TorchState.on:
-                              return const Icon(
-                                Icons.flash_on,
-                                color: Colors.orange,
-                              );
-                          }
-                        },
+                      title: Text(
+                        widget.hintText,
+                        textAlign: TextAlign.center,
+                        style: widget.hintTextStyle,
+                      ),
+                      trailing: IconButton(
+                        tooltip: "Torch",
+                        onPressed: () => controller.toggleTorch(),
+                        icon: ValueListenableBuilder<TorchState>(
+                          valueListenable: controller.torchState,
+                          builder: (context, state, child) {
+                            switch (state) {
+                              case TorchState.off:
+                                return const Icon(
+                                  Icons.flash_off,
+                                  color: Colors.grey,
+                                );
+                              case TorchState.on:
+                                return const Icon(
+                                  Icons.flash_on,
+                                  color: Colors.orange,
+                                );
+                            }
+                          },
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
         ],
       ),
     );

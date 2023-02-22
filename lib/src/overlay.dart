@@ -22,7 +22,7 @@ class OverlayShape extends ShapeBorder {
     );
     assert(
         (cutOutWidth == null && cutOutHeight == null) ||
-            (cutOutSize == null && cutOutWidth != null && cutOutHeight != null),
+            (cutOutSize == 0.0 && cutOutWidth != null && cutOutHeight != null),
         'Use only cutOutWidth and cutOutHeight or only cutOutSize');
   }
 
