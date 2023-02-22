@@ -19,7 +19,7 @@ class AiBarcodeScanner extends StatefulWidget {
 
   /// Validate barcode text with [ValidateType]
   /// [validateText] and [validateType] must be set together.
-  final String validateText;
+  final String? validateText;
 
   /// Validate type [ValidateType]
   /// Validator working with single string value only.
@@ -138,7 +138,7 @@ class AiBarcodeScanner extends StatefulWidget {
   const AiBarcodeScanner({
     Key? key,
     required this.onScan,
-    this.validateText = '',
+    this.validateText,
     this.validateType,
     this.allowDuplicates = false,
     this.fit = BoxFit.cover,
@@ -172,7 +172,7 @@ class AiBarcodeScanner extends StatefulWidget {
     this.scanWindow,
     this.startDelay,
     this.hintWidget,
-  })  : assert(validateType != null),
+  })  : assert(validateText == null || validateType != null),
         assert(validateText != null || validateType == null),
         super(key: key);
 
@@ -247,10 +247,11 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                 debugPrint('Failed to scan Barcode');
                 return;
               }
-              if (widget.validateText.isNotEmpty) {
+              if (widget.validateText?.isNotEmpty == true) {
                 if (!widget.validateType!.toValidateTypeBool(
-                    barcode.barcodes.first.rawValue ?? "",
-                    widget.validateText)) {
+                  barcode.barcodes.first.rawValue ?? "",
+                  widget.validateText!,
+                )) {
                   HapticFeedback.heavyImpact();
                   final String code = barcode.barcodes.first.rawValue!;
                   debugPrint('Invalid Barcode => $code');
