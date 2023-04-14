@@ -127,6 +127,9 @@ class AiBarcodeScanner extends StatefulWidget {
   /// The function that signals when the barcode scanner is started.
   final void Function(MobileScannerArguments?)? onScannerStarted;
 
+  /// Called when this object is removed from the tree permanently.
+  final void Function()? onDispose;
+
   /// if set barcodes will only be scanned if they fall within this [Rect]
   /// useful for having a cut-out overlay for example. these [Rect]
   /// coordinates are relative to the widget size, so by how much your
@@ -173,6 +176,7 @@ class AiBarcodeScanner extends StatefulWidget {
     this.errorBuilder,
     this.placeholderBuilder,
     this.onScannerStarted,
+    this.onDispose,
     this.scanWindow,
     this.startDelay,
     this.hintWidget,
@@ -203,6 +207,10 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
   void dispose() {
     controller.dispose();
     super.dispose();
+
+    if (widget.onDispose != null) {
+      widget.onDispose!();
+    }
   }
 
   @override

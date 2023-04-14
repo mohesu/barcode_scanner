@@ -53,6 +53,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         });
                       },
                       onDetect: (p0) {},
+                      onDispose: () {
+                        debugPrint("Barcode scanner disposed!");
+                      },
                       controller: MobileScannerController(
                         detectionSpeed: DetectionSpeed.noDuplicates,
                       ),
