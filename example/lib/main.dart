@@ -42,8 +42,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => AiBarcodeScanner(
-                      validateText: 'https://', // link to be validated
-                      validateType: ValidateType.startsWith,
+                      validator: (value) {
+                        return value.startsWith('https://');
+                      },
                       canPop: false,
                       onScan: (String value) {
                         debugPrint(value);
@@ -52,6 +53,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         });
                       },
                       onDetect: (p0) {},
+                      onDispose: () {
+                        debugPrint("Barcode scanner disposed!");
+                      },
                       controller: MobileScannerController(
                         detectionSpeed: DetectionSpeed.noDuplicates,
                       ),

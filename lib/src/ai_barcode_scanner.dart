@@ -19,11 +19,16 @@ class AiBarcodeScanner extends StatefulWidget {
 
   /// Validate barcode text with [ValidateType]
   /// [validateText] and [validateType] must be set together.
+  @Deprecated('Use [validator] instead.')
   final String? validateText;
 
   /// Validate type [ValidateType]
   /// Validator working with single string value only.
+  @Deprecated('Use [validator] instead.')
   final ValidateType? validateType;
+
+  /// Validate barcode text with a function
+  final bool Function(String value)? validator;
 
   /// Set to false if you don't want duplicate barcode to be detected
   final bool allowDuplicates;
@@ -119,8 +124,11 @@ class AiBarcodeScanner extends StatefulWidget {
   /// If this is null, a black [ColoredBox] is used as placeholder.
   final Widget Function(BuildContext, Widget?)? placeholderBuilder;
 
-  ///The function that signals when the barcode scanner is started.
+  /// The function that signals when the barcode scanner is started.
   final void Function(MobileScannerArguments?)? onScannerStarted;
+
+  /// Called when this object is removed from the tree permanently.
+  final void Function()? onDispose;
 
   /// if set barcodes will only be scanned if they fall within this [Rect]
   /// useful for having a cut-out overlay for example. these [Rect]
@@ -138,8 +146,7 @@ class AiBarcodeScanner extends StatefulWidget {
   const AiBarcodeScanner({
     Key? key,
     required this.onScan,
-    this.validateText,
-    this.validateType,
+    this.validator,
     this.allowDuplicates = false,
     this.fit = BoxFit.cover,
     this.controller,
@@ -169,9 +176,12 @@ class AiBarcodeScanner extends StatefulWidget {
     this.errorBuilder,
     this.placeholderBuilder,
     this.onScannerStarted,
+    this.onDispose,
     this.scanWindow,
     this.startDelay,
     this.hintWidget,
+    @Deprecated('Use [validator] instead.') this.validateText,
+    @Deprecated('Use [validator] instead.') this.validateType,
   })  : assert(validateText == null || validateType != null),
         assert(validateText != null || validateType == null),
         super(key: key);
@@ -197,6 +207,10 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
   void dispose() {
     controller.dispose();
     super.dispose();
+
+    if (widget.onDispose != null) {
+      widget.onDispose!();
+    }
   }
 
   @override
@@ -243,29 +257,33 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
             key: widget.key,
             onDetect: (BarcodeCapture barcode) async {
               widget.onDetect?.call(barcode);
+
               if (barcode.barcodes.isEmpty) {
                 debugPrint('Failed to scan Barcode');
                 return;
               }
-              if (widget.validateText?.isNotEmpty == true) {
-                if (!widget.validateType!.toValidateTypeBool(
-                  barcode.barcodes.first.rawValue ?? "",
-                  widget.validateText!,
-                )) {
-                  HapticFeedback.heavyImpact();
-                  final String code = barcode.barcodes.first.rawValue!;
-                  debugPrint('Invalid Barcode => $code');
-                  _isSuccess = false;
-                  setState(() {});
-                  return;
-                }
+
+              final String code = barcode.barcodes.first.rawValue ?? "";
+
+              if ((widget.validator != null && !widget.validator!(code)) ||
+                  (widget.validateText?.isNotEmpty == true &&
+                      !widget.validateType!.toValidateTypeBool(
+                        code,
+                        widget.validateText!,
+                      ))) {
+                HapticFeedback.heavyImpact();
+                debugPrint('Invalid Barcode => $code');
+                _isSuccess = false;
+                setState(() {});
+                return;
               }
+
               _isSuccess = true;
               HapticFeedback.lightImpact();
-              final String code = barcode.barcodes.first.rawValue!;
               debugPrint('Barcode rawValue => $code');
               widget.onScan(code);
               setState(() {});
+
               if (widget.canPop && mounted && Navigator.canPop(context)) {
                 Navigator.pop(context);
               }
