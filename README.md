@@ -28,17 +28,6 @@ _The only difference is that this plugin provides a ready to use UI widget with 
 </tr>
 </table>
 
-## Features Supported
-
-See the example app for detailed implementation information.
-
-| Features               | Android | iOS | macOS | Web |
-| ---------------------- | ------- | --- | ----- | --- |
-| analyzeImage (Gallery) | ✅      | ✅  | ❌    | ❌  |
-| returnImage            | ✅      | ✅  | ❌    | ❌  |
-| scanWindow             | ✅      | ✅  | ❌    | ❌  |
-| barcodeOverlay         | ✅      | ✅  | ❌    | ❌  |
-
 ## Platform Support
 
 | Android | iOS | macOS | Web | Linux | Windows |

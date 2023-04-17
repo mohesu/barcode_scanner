@@ -1,3 +1,7 @@
+## 0.0.6
+
+- Readme updated
+
 ## 0.0.5
 
 - [#43](https://github.com/mohesu/barcode_scanner/pull/43) added, Thanks to @MahmoudKhalid
