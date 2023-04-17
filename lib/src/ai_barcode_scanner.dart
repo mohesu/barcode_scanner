@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -19,12 +21,14 @@ class AiBarcodeScanner extends StatefulWidget {
 
   /// Validate barcode text with [ValidateType]
   /// [validateText] and [validateType] must be set together.
-  @Deprecated('Use [validator] instead.')
+  /// [validateText] now deprecated, use [validator] instead.
+  @Deprecated('Use [validator] instead. This will be removed in next version.')
   final String? validateText;
 
   /// Validate type [ValidateType]
   /// Validator working with single string value only.
-  @Deprecated('Use [validator] instead.')
+  /// [validateText] and [validateType] now deprecated, use [validator] instead.
+  @Deprecated('Use [validator] instead. This will be removed in next version.')
   final ValidateType? validateType;
 
   /// Validate barcode text with a function
@@ -180,8 +184,10 @@ class AiBarcodeScanner extends StatefulWidget {
     this.scanWindow,
     this.startDelay,
     this.hintWidget,
-    @Deprecated('Use [validator] instead.') this.validateText,
-    @Deprecated('Use [validator] instead.') this.validateType,
+    @Deprecated('Use [validator] instead. This will be removed in next version.')
+        this.validateText,
+    @Deprecated('Use [validator] instead. This will be removed in next version.')
+        this.validateType,
   })  : assert(validateText == null || validateType != null),
         assert(validateText != null || validateType == null),
         super(key: key);
@@ -208,8 +214,9 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
     controller.dispose();
     super.dispose();
 
+    /// calls onDispose function if it is not null
     if (widget.onDispose != null) {
-      widget.onDispose!();
+      widget.onDispose!.call();
     }
   }
 
@@ -259,7 +266,7 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
               widget.onDetect?.call(barcode);
 
               if (barcode.barcodes.isEmpty) {
-                debugPrint('Failed to scan Barcode');
+                log('Scanned Code is Empty');
                 return;
               }
 
@@ -271,21 +278,22 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                         code,
                         widget.validateText!,
                       ))) {
-                HapticFeedback.heavyImpact();
-                debugPrint('Invalid Barcode => $code');
-                _isSuccess = false;
-                setState(() {});
+                setState(() {
+                  HapticFeedback.heavyImpact();
+                  log('Invalid Barcode => $code');
+                  _isSuccess = false;
+                });
                 return;
               }
-
-              _isSuccess = true;
-              HapticFeedback.lightImpact();
-              debugPrint('Barcode rawValue => $code');
-              widget.onScan(code);
-              setState(() {});
-
+              setState(() {
+                _isSuccess = true;
+                HapticFeedback.lightImpact();
+                log('Barcode rawValue => $code');
+                widget.onScan(code);
+              });
               if (widget.canPop && mounted && Navigator.canPop(context)) {
                 Navigator.pop(context);
+                return;
               }
             },
           ),
@@ -317,54 +325,58 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
               SafeArea(
                 child: Align(
                   alignment: Alignment.bottomCenter,
-                  child: Container(
-                    margin: widget.hintMargin,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(widget.borderRadius),
-                      color: widget.hintBackgroundColor,
-                    ),
-                    child: ListTile(
-                      contentPadding: widget.hintPadding,
-                      leading: IconButton(
-                        color: Theme.of(context).primaryColor,
-                        tooltip: "Switch Camera",
-                        onPressed: () => controller.switchCamera(),
-                        icon: ValueListenableBuilder<CameraFacing>(
-                          valueListenable: controller.cameraFacingState,
-                          builder: (context, state, child) {
-                            switch (state) {
-                              case CameraFacing.front:
-                                return const Icon(Icons.camera_front);
-                              case CameraFacing.back:
-                                return const Icon(Icons.camera_rear);
-                            }
-                          },
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 400),
+                    child: Container(
+                      margin: widget.hintMargin,
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.circular(widget.borderRadius),
+                        color: widget.hintBackgroundColor,
+                      ),
+                      child: ListTile(
+                        contentPadding: widget.hintPadding,
+                        leading: IconButton(
+                          color: Theme.of(context).primaryColor,
+                          tooltip: "Switch Camera",
+                          onPressed: () => controller.switchCamera(),
+                          icon: ValueListenableBuilder<CameraFacing>(
+                            valueListenable: controller.cameraFacingState,
+                            builder: (context, state, child) {
+                              switch (state) {
+                                case CameraFacing.front:
+                                  return const Icon(Icons.camera_front);
+                                case CameraFacing.back:
+                                  return const Icon(Icons.camera_rear);
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                      title: Text(
-                        widget.hintText,
-                        textAlign: TextAlign.center,
-                        style: widget.hintTextStyle,
-                      ),
-                      trailing: IconButton(
-                        tooltip: "Torch",
-                        onPressed: () => controller.toggleTorch(),
-                        icon: ValueListenableBuilder<TorchState>(
-                          valueListenable: controller.torchState,
-                          builder: (context, state, child) {
-                            switch (state) {
-                              case TorchState.off:
-                                return const Icon(
-                                  Icons.flash_off,
-                                  color: Colors.grey,
-                                );
-                              case TorchState.on:
-                                return const Icon(
-                                  Icons.flash_on,
-                                  color: Colors.orange,
-                                );
-                            }
-                          },
+                        title: Text(
+                          widget.hintText,
+                          textAlign: TextAlign.center,
+                          style: widget.hintTextStyle,
+                        ),
+                        trailing: IconButton(
+                          tooltip: "Torch",
+                          onPressed: () => controller.toggleTorch(),
+                          icon: ValueListenableBuilder<TorchState>(
+                            valueListenable: controller.torchState,
+                            builder: (context, state, child) {
+                              switch (state) {
+                                case TorchState.off:
+                                  return const Icon(
+                                    Icons.flash_off,
+                                    color: Colors.grey,
+                                  );
+                                case TorchState.on:
+                                  return const Icon(
+                                    Icons.flash_on,
+                                    color: Colors.orange,
+                                  );
+                              }
+                            },
+                          ),
                         ),
                       ),
                     ),

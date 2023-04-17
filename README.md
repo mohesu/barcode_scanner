@@ -1,14 +1,21 @@
 # ai_barcode_scanner
 
 [![pub package](https://img.shields.io/pub/v/ai_barcode_scanner.svg)](https://pub.dev/packages/ai_barcode_scanner)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/juliansteenbakker?label=Sponsor%20Julian%20Steenbakker!)](https://github.com/sponsors/juliansteenbakker)
 
-AI barcode and QR code scanner for Flutter based on MLKit. Uses CameraX on Android, AVFoundation on iOS and Apple Vision & AVFoundation on macOS based on [mobile_scanner](https://pub.dev/packages/mobile_scanner).
+### Note:
 
-## Platform Support
+_This plugin is based on the [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin by [steenbakker.dev](https://pub.dev/publishers/steenbakker.dev/packages)._
 
-| Android | iOS | macOS | Web | Linux | Windows |
-| ------- | --- | ----- | --- | ----- | ------- |
-| ✔       | ✔   | ✔     | ✔   | :x:   | :x:     |
+_Huge thanks to [Julian Steenbakker](https://github.com/sponsors/juliansteenbakker)_ 🙏
+
+An universal barcode and QR code scanner for Flutter based on MLKit. Uses CameraX on Android, AVFoundation on iOS and Apple Vision & AVFoundation on macOS.
+
+### What's deferent from [mobile_scanner](https://pub.dev/packages/mobile_scanner)?
+
+_The only difference is that this plugin provides a ready to use UI widget with customizable options._
+
+### Preview of the widget
 
 <table>
   <tr>
@@ -21,51 +28,57 @@ AI barcode and QR code scanner for Flutter based on MLKit. Uses CameraX on Andro
 </tr>
 </table>
 
-### Note:
+## Features Supported
 
-_This plugin is based on the [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin by [steenbakker.dev](https://pub.dev/publishers/steenbakker.dev/packages)._
+See the example app for detailed implementation information.
 
-_I recommend you to read the [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin's documentation._
+| Features               | Android | iOS | macOS | Web |
+| ---------------------- | ------- | --- | ----- | --- |
+| analyzeImage (Gallery) | ✅      | ✅  | ❌    | ❌  |
+| returnImage            | ✅      | ✅  | ❌    | ❌  |
+| scanWindow             | ✅      | ✅  | ❌    | ❌  |
+| barcodeOverlay         | ✅      | ✅  | ❌    | ❌  |
+
+## Platform Support
+
+| Android | iOS | macOS | Web | Linux | Windows |
+| ------- | --- | ----- | --- | ----- | ------- |
+| ✅      | ✅  | ✅    | ✅  | ❌    | ❌      |
+
+## Platform specific setup
 
 ### Android
 
-SDK 21 and newer. Reason: CameraX requires at least SDK 21.
-Also, make sure you upgrade kotlin to the latest version in your project.
-
-This packages uses the **bundled version** of MLKit Barcode-scanning for Android. This version is more accurate and immediately available to devices. However, this version will increas the size of the app with approximately 3 to 10 MB. The alternative for this is to use the **unbundled version** of MLKit Barcode-scanning for Android. This version is older than the bundled version however this only increases the size by around 600KB.
-
-To use this version you must alter the ai_barcode_scanner gradle file to replace `com.google.mlkit:barcode-scanning:17.0.2` with `com.google.android.gms:play-services-mlkit-barcode-scanning:18.0.0`. Keep in mind that if you alter the gradle files directly in your project it can be overriden when you update your pubspec.yaml. I am still searching for a way to properly replace the module in gradle but have yet to find one.
+This packages uses the **bundled version** of MLKit Barcode-scanning for Android. This version is more accurate and immediately available to devices. However, this version will increase the size of the app with approximately 3 to 10 MB. The alternative for this is to use the **unbundled version** of MLKit Barcode-scanning for Android. This version is older than the bundled version however this only increases the size by around 600KB.
+To use this version you must alter the mobile_scanner gradle file to replace `com.google.mlkit:barcode-scanning:17.0.2` with `com.google.android.gms:play-services-mlkit-barcode-scanning:18.0.0`. Keep in mind that if you alter the gradle files directly in your project it can be overriden when you update your pubspec.yaml. I am still searching for a way to properly replace the module in gradle but have yet to find one.
 
 [You can read more about the difference between the two versions here.](https://developers.google.com/ml-kit/vision/barcode-scanning/android)
 
 ### iOS
 
-iOS 11 and newer. Reason: MLKit for iOS requires at least iOS 10 and a [64bit device](https://developers.google.com/ml-kit/migration/ios).
-
 **Add the following keys to your Info.plist file, located in <project root>/ios/Runner/Info.plist:**
-
 NSCameraUsageDescription - describe why your app needs access to the camera. This is called Privacy - Camera Usage Description in the visual editor.
 
 **If you want to use the local gallery feature from [image_picker](https://pub.dev/packages/image_picker)**
-
 NSPhotoLibraryUsageDescription - describe why your app needs permission for the photo library. This is called Privacy - Photo Library Usage Description in the visual editor.
+
+Example,
+
+```
+<key>NSCameraUsageDescription</key>
+<string>This app needs camera access to scan QR codes</string>
+
+<key>NSPhotoLibraryUsageDescription</key>
+<string>This app needs photos access to get QR code from photo library</string>
+```
 
 ### macOS
 
-macOS 10.13 or newer. Reason: Apple Vision library.
+Ensure that you granted camera permission in XCode -> Signing & Capabilities:
 
-### Web
+<img width="696" alt="Screenshot of XCode where Camera is checked" src="https://user-images.githubusercontent.com/24459435/193464115-d76f81d0-6355-4cb2-8bee-538e413a3ad0.png">
 
-Add this to `web/index.html`:
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-```
-
-Web only supports QR codes for now.
-Do you have experience with Flutter Web development? [Help me with migrating from jsQR to qr-scanner for full barcode support!](https://github.com/juliansteenbakker/ai_barcode_scanner/issues/54)
-
-## Usage
+## Usage ([ai_barcode_scanner](https://pub.dev/packages/ai_barcode_scanner))
 
 Import `package:ai_barcode_scanner/ai_barcode_scanner.dart`, and use the widget with or without the controller.
 
@@ -81,6 +94,9 @@ AiBarcodeScanner(
         onScan: (String value) {
           debugPrint(value);
         },
+        onDetect: (BarcodeCapture barcodeCapture) {
+          debugPrint(barcodeCapture);
+        },
       ),
 
 /// Example of using the barcode scanner with a controller.
@@ -89,18 +105,184 @@ AiBarcodeScanner(
           onScan: (String value) {
             debugPrint(value);
           },
+        onDetect: (BarcodeCapture barcodeCapture) {
+          debugPrint(barcodeCapture);
+        },
       ),
 
 /// Example of using the barcode scanner with validation.
 /// Validator works on the raw string, not the decoded value.
-/// If you want to validate the scanner, use the [validateText] and [validateType] parameters.
+/// If you want to validate the scanner, use the [validate] parameter.
 AiBarcodeScanner(
-        validateText: 'https://',
-        validateType: ValidateType.startsWith,
+        validate: (String value) {
+          if(value.startsWith('http')) {
+            return true;
+          }
+          return false;
+        },
           onScan: (String value) {
             debugPrint(value);
           },
       ),
+```
+
+## Usage ([mobile_scanner](https://pub.dev/packages/mobile_scanner))
+
+Import `package:mobile_scanner/mobile_scanner.dart`, and use the widget with or without the controller.
+
+If you don't provide a controller, you can't control functions like the torch(flash) or switching camera.
+
+If you don't set `detectionSpeed` to `DetectionSpeed.noDuplicates`, you can get multiple scans in a very short time, causing things like pop() to fire lots of times.
+
+Example without controller:
+
+```dart
+import 'package:mobile_scanner/mobile_scanner.dart';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Mobile Scanner')),
+      body: MobileScanner(
+        // fit: BoxFit.contain,
+        onDetect: (capture) {
+          final List<Barcode> barcodes = capture.barcodes;
+          final Uint8List? image = capture.image;
+          for (final barcode in barcodes) {
+            debugPrint('Barcode found! ${barcode.rawValue}');
+          }
+        },
+      ),
+    );
+  }
+```
+
+Example with controller and initial values:
+
+```dart
+import 'package:mobile_scanner/mobile_scanner.dart';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Mobile Scanner')),
+      body: MobileScanner(
+        // fit: BoxFit.contain,
+        controller: MobileScannerController(
+          detectionSpeed: DetectionSpeed.normal,
+          facing: CameraFacing.front,
+          torchEnabled: true,
+        ),
+        onDetect: (capture) {
+          final List<Barcode> barcodes = capture.barcodes;
+          final Uint8List? image = capture.image;
+          for (final barcode in barcodes) {
+            debugPrint('Barcode found! ${barcode.rawValue}');
+          }
+        },
+      ),
+    );
+  }
+```
+
+Example with controller and torch & camera controls:
+
+```dart
+import 'package:mobile_scanner/mobile_scanner.dart';
+
+  MobileScannerController cameraController = MobileScannerController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('Mobile Scanner'),
+          actions: [
+            IconButton(
+              color: Colors.white,
+              icon: ValueListenableBuilder(
+                valueListenable: cameraController.torchState,
+                builder: (context, state, child) {
+                  switch (state as TorchState) {
+                    case TorchState.off:
+                      return const Icon(Icons.flash_off, color: Colors.grey);
+                    case TorchState.on:
+                      return const Icon(Icons.flash_on, color: Colors.yellow);
+                  }
+                },
+              ),
+              iconSize: 32.0,
+              onPressed: () => cameraController.toggleTorch(),
+            ),
+            IconButton(
+              color: Colors.white,
+              icon: ValueListenableBuilder(
+                valueListenable: cameraController.cameraFacingState,
+                builder: (context, state, child) {
+                  switch (state as CameraFacing) {
+                    case CameraFacing.front:
+                      return const Icon(Icons.camera_front);
+                    case CameraFacing.back:
+                      return const Icon(Icons.camera_rear);
+                  }
+                },
+              ),
+              iconSize: 32.0,
+              onPressed: () => cameraController.switchCamera(),
+            ),
+          ],
+        ),
+        body: MobileScanner(
+          // fit: BoxFit.contain,
+          controller: cameraController,
+          onDetect: (capture) {
+            final List<Barcode> barcodes = capture.barcodes;
+            final Uint8List? image = capture.image;
+            for (final barcode in barcodes) {
+              debugPrint('Barcode found! ${barcode.rawValue}');
+            }
+          },
+        ),
+    );
+  }
+```
+
+Example with controller and returning images
+
+```dart
+import 'package:mobile_scanner/mobile_scanner.dart';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Mobile Scanner')),
+      body: MobileScanner(
+        fit: BoxFit.contain,
+        controller: MobileScannerController(
+          // facing: CameraFacing.back,
+          // torchEnabled: false,
+          returnImage: true,
+        ),
+        onDetect: (capture) {
+          final List<Barcode> barcodes = capture.barcodes;
+          final Uint8List? image = capture.image;
+          for (final barcode in barcodes) {
+            debugPrint('Barcode found! ${barcode.rawValue}');
+          }
+          if (image != null) {
+            showDialog(
+              context: context,
+              builder: (context) =>
+                  Image(image: MemoryImage(image)),
+            );
+            Future.delayed(const Duration(seconds: 5), () {
+              Navigator.pop(context);
+            });
+          }
+        },
+      ),
+    );
+  }
 ```
 
 ### BarcodeCapture
@@ -131,15 +313,7 @@ You can use the following properties of the Barcode object.
 | url           | UrlBookmark?   |                                     |
 | wifi          | WiFi?          | WiFi Access-Point details           |
 
-## Thanks to
-
-The [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin by [steenbakker.dev](https://pub.dev/publishers/steenbakker.dev/packages).
-
-This package depends on [mobile_scanner](https://pub.dev/packages/mobile_scanner)
-
-I recommend you to read the [mobile_scanner](https://pub.dev/packages/mobile_scanner) plugin's documentation.
-
-### Parameters of the widget
+### Constructor parameters for [ai_barcode_scanner](https://pub.dev/packages/ai_barcode_scanner)
 
 ```dart
   /// Function that gets Called when barcode is scanned successfully
@@ -154,11 +328,18 @@ I recommend you to read the [mobile_scanner](https://pub.dev/packages/mobile_sca
 
   /// Validate barcode text with [ValidateType]
   /// [validateText] and [validateType] must be set together.
-  final String validateText;
+  /// [validateText] now deprecated, use [validator] instead.
+  @Deprecated('Use [validator] instead. This will be removed in next version.')
+  final String? validateText;
 
   /// Validate type [ValidateType]
   /// Validator working with single string value only.
+  /// [validateText] and [validateType] now deprecated, use [validator] instead.
+  @Deprecated('Use [validator] instead. This will be removed in next version.')
   final ValidateType? validateType;
+
+  /// Validate barcode text with a function
+  final bool Function(String value)? validator;
 
   /// Set to false if you don't want duplicate barcode to be detected
   final bool allowDuplicates;
@@ -254,8 +435,11 @@ I recommend you to read the [mobile_scanner](https://pub.dev/packages/mobile_sca
   /// If this is null, a black [ColoredBox] is used as placeholder.
   final Widget Function(BuildContext, Widget?)? placeholderBuilder;
 
-  ///The function that signals when the barcode scanner is started.
+  /// The function that signals when the barcode scanner is started.
   final void Function(MobileScannerArguments?)? onScannerStarted;
+
+  /// Called when this object is removed from the tree permanently.
+  final void Function()? onDispose;
 
   /// if set barcodes will only be scanned if they fall within this [Rect]
   /// useful for having a cut-out overlay for example. these [Rect]
@@ -269,4 +453,19 @@ I recommend you to read the [mobile_scanner](https://pub.dev/packages/mobile_sca
   ///
   /// Default: false
   final bool? startDelay;
+
 ```
+
+### Contributing to [ai_barcode_scanner](https://pub.dev/packages/ai_barcode_scanner)
+
+All contributions are welcome. Let's make this package better together.
+
+## Thanks to all the contributors and supporters.
+
+### Contributors
+
+<a href="https://github.com/mohesu/barcode_scanner/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=mohesu/barcode_scanner" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
