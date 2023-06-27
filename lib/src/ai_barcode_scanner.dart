@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import 'enums/validate_type.dart';
 import 'overlay.dart';
 
 /// Barcode scanner widget
@@ -18,18 +17,6 @@ class AiBarcodeScanner extends StatefulWidget {
   /// [barcode] The barcode object with all information about the scanned code.
   /// [args] Information about the state of the MobileScanner widget
   final void Function(BarcodeCapture)? onDetect;
-
-  /// Validate barcode text with [ValidateType]
-  /// [validateText] and [validateType] must be set together.
-  /// [validateText] now deprecated, use [validator] instead.
-  @Deprecated('Use [validator] instead. This will be removed in next version.')
-  final String? validateText;
-
-  /// Validate type [ValidateType]
-  /// Validator working with single string value only.
-  /// [validateText] and [validateType] now deprecated, use [validator] instead.
-  @Deprecated('Use [validator] instead. This will be removed in next version.')
-  final ValidateType? validateType;
 
   /// Validate barcode text with a function
   final bool Function(String value)? validator;
@@ -184,13 +171,7 @@ class AiBarcodeScanner extends StatefulWidget {
     this.scanWindow,
     this.startDelay,
     this.hintWidget,
-    @Deprecated('Use [validator] instead. This will be removed in next version.')
-        this.validateText,
-    @Deprecated('Use [validator] instead. This will be removed in next version.')
-        this.validateType,
-  })  : assert(validateText == null || validateType != null),
-        assert(validateText != null || validateType == null),
-        super(key: key);
+  }) : super(key: key);
 
   @override
   State<AiBarcodeScanner> createState() => _AiBarcodeScannerState();
@@ -234,14 +215,14 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
             fit: widget.fit,
             errorBuilder: widget.errorBuilder ??
                 (context, error, child) {
-                  return ColoredBox(
+                  return const ColoredBox(
                     color: Colors.black,
                     child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
+                        children: [
                           Icon(
                             Icons.no_photography,
                             color: Colors.white,
@@ -272,12 +253,7 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
 
               final String code = barcode.barcodes.first.rawValue ?? "";
 
-              if ((widget.validator != null && !widget.validator!(code)) ||
-                  (widget.validateText?.isNotEmpty == true &&
-                      !widget.validateType!.toValidateTypeBool(
-                        code,
-                        widget.validateText!,
-                      ))) {
+              if ((widget.validator != null && !widget.validator!(code))) {
                 setState(() {
                   HapticFeedback.heavyImpact();
                   log('Invalid Barcode => $code');

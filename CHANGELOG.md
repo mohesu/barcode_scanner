@@ -1,3 +1,8 @@
+## 0.0.7
+
+- Dependency updates
+- validateText and validateType deprecated removed
+
 ## 0.0.6
 
 - Readme updated
