@@ -185,23 +185,6 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
   late MobileScannerController controller;
 
   @override
-  void initState() {
-    controller = widget.controller ?? MobileScannerController();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-
-    /// calls onDispose function if it is not null
-    if (widget.onDispose != null) {
-      widget.onDispose!.call();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     /// keeps the app in portrait mode
     SystemChrome.setPreferredOrientations([
@@ -362,5 +345,22 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+
+    /// calls onDispose function if it is not null
+    if (widget.onDispose != null) {
+      widget.onDispose!.call();
+    }
+  }
+
+  @override
+  void initState() {
+    controller = widget.controller ?? MobileScannerController();
+    super.initState();
   }
 }

@@ -3,29 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class OverlayShape extends ShapeBorder {
-  OverlayShape({
-    this.borderColor = Colors.red,
-    this.borderWidth = 4.0,
-    this.overlayColor = const Color.fromRGBO(0, 0, 0, 80),
-    this.borderRadius = 0,
-    this.borderLength = 42,
-    double? cutOutSize,
-    double? cutOutWidth,
-    double? cutOutHeight,
-    this.cutOutBottomOffset = 0,
-  })  : cutOutWidth = cutOutWidth ?? cutOutSize ?? 250,
-        cutOutHeight = cutOutHeight ?? cutOutSize ?? 250 {
-    assert(
-      borderLength <=
-          min(this.cutOutWidth, this.cutOutHeight) / 2 + borderWidth * 2,
-      "Border can't be larger than ${min(this.cutOutWidth, this.cutOutHeight) / 2 + borderWidth * 2}",
-    );
-    assert(
-        (cutOutWidth == null && cutOutHeight == null) ||
-            (cutOutSize == 0.0 && cutOutWidth != null && cutOutHeight != null),
-        'Use only cutOutWidth and cutOutHeight or only cutOutSize');
-  }
-
   /// Color of the border.
   final Color borderColor;
 
@@ -49,6 +26,29 @@ class OverlayShape extends ShapeBorder {
 
   /// Bottom offset of the cut out.
   final double cutOutBottomOffset;
+
+  OverlayShape({
+    this.borderColor = Colors.red,
+    this.borderWidth = 4.0,
+    this.overlayColor = const Color.fromRGBO(0, 0, 0, 80),
+    this.borderRadius = 0,
+    this.borderLength = 42,
+    double? cutOutSize,
+    double? cutOutWidth,
+    double? cutOutHeight,
+    this.cutOutBottomOffset = 0,
+  })  : cutOutWidth = cutOutWidth ?? cutOutSize ?? 250,
+        cutOutHeight = cutOutHeight ?? cutOutSize ?? 250 {
+    assert(
+      borderLength <=
+          min(this.cutOutWidth, this.cutOutHeight) / 2 + borderWidth * 2,
+      "Border can't be larger than ${min(this.cutOutWidth, this.cutOutHeight) / 2 + borderWidth * 2}",
+    );
+    assert(
+        (cutOutWidth == null && cutOutHeight == null) ||
+            (cutOutSize == 0.0 && cutOutWidth != null && cutOutHeight != null),
+        'Use only cutOutWidth and cutOutHeight or only cutOutSize');
+  }
 
   @override
   EdgeInsetsGeometry get dimensions => const EdgeInsets.all(10);
