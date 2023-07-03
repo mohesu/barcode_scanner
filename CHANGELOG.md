@@ -1,3 +1,7 @@
+## 0.0.7-dev.1
+
+- error widget fixed
+
 ## 0.0.7
 
 - Dependency updates

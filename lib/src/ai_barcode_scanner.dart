@@ -196,31 +196,7 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
           MobileScanner(
             controller: controller,
             fit: widget.fit,
-            errorBuilder: widget.errorBuilder ??
-                (context, error, child) {
-                  return const ColoredBox(
-                    color: Colors.black,
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.no_photography,
-                            color: Colors.white,
-                            size: 100,
-                          ),
-                          SizedBox(height: 20),
-                          Text(
-                            "Failed to load camera.",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+            errorBuilder: widget.errorBuilder,
             onScannerStarted: widget.onScannerStarted,
             placeholderBuilder: widget.placeholderBuilder,
             scanWindow: widget.scanWindow,
