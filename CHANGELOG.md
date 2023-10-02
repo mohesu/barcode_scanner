@@ -1,3 +1,17 @@
+## 3.4.1
+
+- Jump to 3.4.1 to match the version of mobile_scanner
+- Dependency updates
+- mobile_scanner: ^3.4.1
+- readme updated
+- topics added
+- Major changes in AiBarcodeScanner class
+- allowDuplicates, hintMargin, hintPadding, hintBackgroundColor, errorText and successText removed
+- hintWidget => bottomBar
+- hintText => bottomBarText
+- hintTextStyle => bottomBarTextStyle
+- appBar added
+
 ## 0.0.7-dev.1
 
 - error widget fixed
