@@ -185,123 +185,187 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
 
   @override
   Widget build(BuildContext context) {
-    /// keeps the app in portrait mode
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
-    return Scaffold(
-      bottomNavigationBar: widget.bottomBar ??
-          ListTile(
-            leading: IconButton(
-              tooltip: "Switch Camera",
-              onPressed: () => controller.switchCamera(),
-              icon: ValueListenableBuilder<CameraFacing>(
-                valueListenable: controller.cameraFacingState,
-                builder: (context, state, child) {
-                  switch (state) {
-                    case CameraFacing.front:
-                      return const Icon(Icons.camera_front);
-                    case CameraFacing.back:
-                      return const Icon(Icons.camera_rear);
+    // /// keeps the app in portrait mode
+    // SystemChrome.setPreferredOrientations([
+    //   DeviceOrientation.portraitUp,
+    // ]);
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        return Scaffold(
+          bottomNavigationBar: orientation == Orientation.portrait
+              ? widget.bottomBar ??
+                  ListTile(
+                    leading: Builder(
+                      builder: (context) {
+                        return IconButton(
+                          tooltip: "Switch Camera",
+                          onPressed: () => controller.switchCamera(),
+                          icon: ValueListenableBuilder<CameraFacing>(
+                            valueListenable: controller.cameraFacingState,
+                            builder: (context, state, child) {
+                              switch (state) {
+                                case CameraFacing.front:
+                                  return const Icon(
+                                      Icons.camera_front);
+                                case CameraFacing.back:
+                                  return const Icon(
+                                      Icons.camera_rear);
+                              }
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                    title: Text(
+                      widget.bottomBarText,
+                      textAlign: TextAlign.center,
+                      style: widget.bottomBarTextStyle,
+                    ),
+                    trailing: Builder(
+                      builder: (context) {
+                        return IconButton(
+                          tooltip: "Torch",
+                          onPressed: () => controller.toggleTorch(),
+                          icon: ValueListenableBuilder<TorchState>(
+                            valueListenable: controller.torchState,
+                            builder: (context, state, child) {
+                              switch (state) {
+                                case TorchState.off:
+                                  return const Icon(
+                                      Icons.flash_off);
+                                case TorchState.on:
+                                  return const Icon(
+                                      Icons.flash_on);
+                              }
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  )
+              : null,
+          appBar: widget.appBar,
+          body: Stack(
+
+            children: [
+              MobileScanner(
+                controller: controller,
+                fit: widget.fit,
+                errorBuilder: widget.errorBuilder,
+                onScannerStarted: widget.onScannerStarted,
+                placeholderBuilder: widget.placeholderBuilder,
+                scanWindow: widget.scanWindow,
+                startDelay: widget.startDelay ?? false,
+                key: widget.key,
+                onDetect: (BarcodeCapture barcode) async {
+                  widget.onDetect?.call(barcode);
+
+                  if (barcode.barcodes.isEmpty) {
+                    log('Scanned Code is Empty');
+                    return;
+                  }
+
+                  final String code = barcode.barcodes.first.rawValue ?? "";
+
+                  if ((widget.validator != null && !widget.validator!(code))) {
+                    setState(() {
+                      HapticFeedback.heavyImpact();
+                      log('Invalid Barcode => $code');
+                      _isSuccess = false;
+                    });
+                    return;
+                  }
+                  setState(() {
+                    _isSuccess = true;
+                    HapticFeedback.lightImpact();
+                    log('Barcode rawValue => $code');
+                    widget.onScan(code);
+                  });
+                  if (widget.canPop && mounted && Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                    return;
                   }
                 },
               ),
-            ),
-            title: Text(
-              widget.bottomBarText,
-              textAlign: TextAlign.center,
-              style: widget.bottomBarTextStyle,
-            ),
-            trailing: IconButton(
-              tooltip: "Torch",
-              onPressed: () => controller.toggleTorch(),
-              icon: ValueListenableBuilder<TorchState>(
-                valueListenable: controller.torchState,
-                builder: (context, state, child) {
-                  switch (state) {
-                    case TorchState.off:
-                      return const Icon(
-                        Icons.flash_off,
-                        color: Colors.grey,
-                      );
-                    case TorchState.on:
-                      return const Icon(
-                        Icons.flash_on,
-                        color: Colors.orange,
-                      );
-                  }
-                },
-              ),
-            ),
-          ),
-      appBar: widget.appBar,
-      body: Stack(
-        children: [
-          MobileScanner(
-            controller: controller,
-            fit: widget.fit,
-            errorBuilder: widget.errorBuilder,
-            onScannerStarted: widget.onScannerStarted,
-            placeholderBuilder: widget.placeholderBuilder,
-            scanWindow: widget.scanWindow,
-            startDelay: widget.startDelay ?? false,
-            key: widget.key,
-            onDetect: (BarcodeCapture barcode) async {
-              widget.onDetect?.call(barcode);
-
-              if (barcode.barcodes.isEmpty) {
-                log('Scanned Code is Empty');
-                return;
-              }
-
-              final String code = barcode.barcodes.first.rawValue ?? "";
-
-              if ((widget.validator != null && !widget.validator!(code))) {
-                setState(() {
-                  HapticFeedback.heavyImpact();
-                  log('Invalid Barcode => $code');
-                  _isSuccess = false;
-                });
-                return;
-              }
-              setState(() {
-                _isSuccess = true;
-                HapticFeedback.lightImpact();
-                log('Barcode rawValue => $code');
-                widget.onScan(code);
-              });
-              if (widget.canPop && mounted && Navigator.canPop(context)) {
-                Navigator.pop(context);
-                return;
-              }
-            },
-          ),
-          if (widget.showOverlay)
-            Container(
-              decoration: ShapeDecoration(
-                shape: OverlayShape(
-                  borderRadius: widget.borderRadius,
-                  borderColor: ((_isSuccess ?? false) && widget.showSuccess)
-                      ? widget.successColor
-                      : (!(_isSuccess ?? true) && widget.showError)
-                          ? widget.errorColor
-                          : widget.borderColor,
-                  borderLength: widget.borderLength,
-                  borderWidth: widget.borderWidth,
-                  cutOutSize: widget.cutOutSize,
-                  cutOutBottomOffset: widget.cutOutBottomOffset,
-                  cutOutWidth: widget.cutOutWidth,
-                  cutOutHeight: widget.cutOutHeight,
-                  overlayColor: ((_isSuccess ?? false) && widget.showSuccess)
-                      ? widget.successColor.withOpacity(0.4)
-                      : (!(_isSuccess ?? true) && widget.showError)
-                          ? widget.errorColor.withOpacity(0.4)
-                          : widget.overlayColor,
+              if (widget.showOverlay)
+                Container(
+                  decoration: ShapeDecoration(
+                    shape: OverlayShape(
+                      borderRadius: widget.borderRadius,
+                      borderColor: ((_isSuccess ?? false) && widget.showSuccess)
+                          ? widget.successColor
+                          : (!(_isSuccess ?? true) && widget.showError)
+                              ? widget.errorColor
+                              : widget.borderColor,
+                      borderLength: widget.borderLength,
+                      borderWidth: widget.borderWidth,
+                      cutOutSize: widget.cutOutSize,
+                      cutOutBottomOffset: widget.cutOutBottomOffset,
+                      cutOutWidth: widget.cutOutWidth,
+                      cutOutHeight: widget.cutOutHeight,
+                      overlayColor:
+                          ((_isSuccess ?? false) && widget.showSuccess)
+                              ? widget.successColor.withOpacity(0.4)
+                              : (!(_isSuccess ?? true) && widget.showError)
+                                  ? widget.errorColor.withOpacity(0.4)
+                                  : widget.overlayColor,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-        ],
-      ),
+              if(orientation == Orientation.landscape)
+              Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.rectangle,),
+
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      IconButton(
+                        tooltip: "Switch Camera",
+                        onPressed: () => controller.switchCamera(),
+                        icon: ValueListenableBuilder<CameraFacing>(
+                          valueListenable: controller.cameraFacingState,
+                          builder: (context, state, child) {
+                            switch (state) {
+                              case CameraFacing.front:
+                                return const Icon(
+                                    Icons.camera_front);
+                              case CameraFacing.back:
+                                return const Icon(
+                                    Icons.camera_rear);
+                            }
+                          },
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: "Torch",
+                        onPressed: () => controller.toggleTorch(),
+                        icon: ValueListenableBuilder<TorchState>(
+                          valueListenable: controller.torchState,
+                          builder: (context, state, child) {
+                            switch (state) {
+                              case TorchState.off:
+                                return const Icon(
+                                    Icons.flash_off);
+                              case TorchState.on:
+                                return const Icon(
+                                    Icons.flash_on);
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            ],
+          ),
+        );
+      },
     );
   }
 }
