@@ -1,3 +1,12 @@
+## 3.4.3
+
+- readme updated
+
+## 3.4.2
+
+- Dependency updates
+- mobile_scanner: ^4.0.0
+
 ## 3.4.1
 
 - Jump to 3.4.1 to match the version of mobile_scanner

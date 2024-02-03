@@ -125,7 +125,7 @@ class AiBarcodeScanner extends StatefulWidget {
   final PreferredSizeWidget? appBar;
 
   const AiBarcodeScanner({
-    Key? key,
+    super.key,
     required this.onScan,
     this.validator,
     this.fit = BoxFit.cover,
@@ -157,7 +157,7 @@ class AiBarcodeScanner extends StatefulWidget {
     this.startDelay,
     this.bottomBar,
     this.appBar,
-  }) : super(key: key);
+  });
 
   @override
   State<AiBarcodeScanner> createState() => _AiBarcodeScannerState();
@@ -189,10 +189,6 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
 
   @override
   Widget build(BuildContext context) {
-    // /// keeps the app in portrait mode
-    // SystemChrome.setPreferredOrientations([
-    //   DeviceOrientation.portraitUp,
-    // ]);
     return OrientationBuilder(
       builder: (context, orientation) {
         return Scaffold(
@@ -338,21 +334,22 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                             },
                           ),
                         ),
-                        IconButton(
-                          tooltip: "Torch",
-                          onPressed: () => controller.toggleTorch(),
-                          icon: ValueListenableBuilder<TorchState>(
-                            valueListenable: controller.torchState,
-                            builder: (context, state, child) {
-                              switch (state) {
-                                case TorchState.off:
-                                  return const Icon(Icons.flash_off);
-                                case TorchState.on:
-                                  return const Icon(Icons.flash_on);
-                              }
-                            },
+                        if (controller.hasTorch)
+                          IconButton(
+                            tooltip: "Torch",
+                            onPressed: () => controller.toggleTorch(),
+                            icon: ValueListenableBuilder<TorchState>(
+                              valueListenable: controller.torchState,
+                              builder: (context, state, child) {
+                                switch (state) {
+                                  case TorchState.off:
+                                    return const Icon(Icons.flash_off);
+                                  case TorchState.on:
+                                    return const Icon(Icons.flash_on);
+                                }
+                              },
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
