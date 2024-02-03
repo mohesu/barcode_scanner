@@ -80,6 +80,9 @@ class AiBarcodeScanner extends StatefulWidget {
   /// Success color (default: green)
   final Color successColor;
 
+  /// A toggle to enable or disable haptic feedback upon scan (default: true)
+  final bool hapticFeedback;
+
   /// Can auto back to previous page when barcode is successfully scanned (default: true)
   final bool canPop;
 
@@ -144,6 +147,7 @@ class AiBarcodeScanner extends StatefulWidget {
     this.errorColor = Colors.red,
     this.showSuccess = true,
     this.successColor = Colors.green,
+    this.hapticFeedback = true,
     this.canPop = true,
     this.errorBuilder,
     this.placeholderBuilder,
@@ -205,11 +209,9 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                             builder: (context, state, child) {
                               switch (state) {
                                 case CameraFacing.front:
-                                  return const Icon(
-                                      Icons.camera_front);
+                                  return const Icon(Icons.camera_front);
                                 case CameraFacing.back:
-                                  return const Icon(
-                                      Icons.camera_rear);
+                                  return const Icon(Icons.camera_rear);
                               }
                             },
                           ),
@@ -231,11 +233,9 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                             builder: (context, state, child) {
                               switch (state) {
                                 case TorchState.off:
-                                  return const Icon(
-                                      Icons.flash_off);
+                                  return const Icon(Icons.flash_off);
                                 case TorchState.on:
-                                  return const Icon(
-                                      Icons.flash_on);
+                                  return const Icon(Icons.flash_on);
                               }
                             },
                           ),
@@ -246,7 +246,6 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
               : null,
           appBar: widget.appBar,
           body: Stack(
-
             children: [
               MobileScanner(
                 controller: controller,
@@ -269,7 +268,7 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
 
                   if ((widget.validator != null && !widget.validator!(code))) {
                     setState(() {
-                      HapticFeedback.heavyImpact();
+                      if (widget.hapticFeedback) HapticFeedback.heavyImpact();
                       log('Invalid Barcode => $code');
                       _isSuccess = false;
                     });
@@ -277,7 +276,7 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                   }
                   setState(() {
                     _isSuccess = true;
-                    HapticFeedback.lightImpact();
+                    if (widget.hapticFeedback) HapticFeedback.lightImpact();
                     log('Barcode rawValue => $code');
                     widget.onScan(code);
                   });
@@ -312,56 +311,52 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                     ),
                   ),
                 ),
-              if(orientation == Orientation.landscape)
-              Align(
-                alignment: Alignment.centerRight,
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.rectangle,),
-
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      IconButton(
-                        tooltip: "Switch Camera",
-                        onPressed: () => controller.switchCamera(),
-                        icon: ValueListenableBuilder<CameraFacing>(
-                          valueListenable: controller.cameraFacingState,
-                          builder: (context, state, child) {
-                            switch (state) {
-                              case CameraFacing.front:
-                                return const Icon(
-                                    Icons.camera_front);
-                              case CameraFacing.back:
-                                return const Icon(
-                                    Icons.camera_rear);
-                            }
-                          },
+              if (orientation == Orientation.landscape)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.rectangle,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        IconButton(
+                          tooltip: "Switch Camera",
+                          onPressed: () => controller.switchCamera(),
+                          icon: ValueListenableBuilder<CameraFacing>(
+                            valueListenable: controller.cameraFacingState,
+                            builder: (context, state, child) {
+                              switch (state) {
+                                case CameraFacing.front:
+                                  return const Icon(Icons.camera_front);
+                                case CameraFacing.back:
+                                  return const Icon(Icons.camera_rear);
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        tooltip: "Torch",
-                        onPressed: () => controller.toggleTorch(),
-                        icon: ValueListenableBuilder<TorchState>(
-                          valueListenable: controller.torchState,
-                          builder: (context, state, child) {
-                            switch (state) {
-                              case TorchState.off:
-                                return const Icon(
-                                    Icons.flash_off);
-                              case TorchState.on:
-                                return const Icon(
-                                    Icons.flash_on);
-                            }
-                          },
+                        IconButton(
+                          tooltip: "Torch",
+                          onPressed: () => controller.toggleTorch(),
+                          icon: ValueListenableBuilder<TorchState>(
+                            valueListenable: controller.torchState,
+                            builder: (context, state, child) {
+                              switch (state) {
+                                case TorchState.off:
+                                  return const Icon(Icons.flash_off);
+                                case TorchState.on:
+                                  return const Icon(Icons.flash_on);
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              )
+                )
             ],
           ),
         );
