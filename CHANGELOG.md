@@ -1,3 +1,9 @@
+## 5.1.1
+
+**BREAKING CHANGES:**
+
+- mobile_scanner: ^5.1.1
+
 ## 3.4.1
 
 - Jump to 3.4.1 to match the version of mobile_scanner

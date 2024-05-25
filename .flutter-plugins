@@ -1,2 +1,13 @@
 # This is a generated file; do not edit or check into version control.
-mobile_scanner=/Users/arvindsangwan/.pub-cache/hosted/pub.dev/mobile_scanner-3.5.5/
+file_selector_linux=/Users/arvindsangwan/.pub-cache/hosted/pub.dev/file_selector_linux-0.9.2+1/
+file_selector_macos=/Users/arvindsangwan/.pub-cache/hosted/pub.dev/file_selector_macos-0.9.4/
+file_selector_windows=/Users/arvindsangwan/.pub-cache/hosted/pub.dev/file_selector_windows-0.9.3+1/
+flutter_plugin_android_lifecycle=/Users/arvindsangwan/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.19/
+image_picker=/Users/arvindsangwan/.pub-cache/hosted/pub.dev/image_picker-1.1.1/
+image_picker_android=/Users/arvindsangwan/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+1/
+image_picker_for_web=/Users/arvindsangwan/.pub-cache/hosted/pub.dev/image_picker_for_web-3.0.4/
+image_picker_ios=/Users/arvindsangwan/.pub-cache/hosted/pub.dev/image_picker_ios-0.8.11+2/
+image_picker_linux=/Users/arvindsangwan/.pub-cache/hosted/pub.dev/image_picker_linux-0.2.1+1/
+image_picker_macos=/Users/arvindsangwan/.pub-cache/hosted/pub.dev/image_picker_macos-0.2.1+1/
+image_picker_windows=/Users/arvindsangwan/.pub-cache/hosted/pub.dev/image_picker_windows-0.2.1+1/
+mobile_scanner=/Users/arvindsangwan/.pub-cache/hosted/pub.dev/mobile_scanner-5.1.1/

@@ -3,7 +3,7 @@
 [![pub package](https://img.shields.io/pub/v/ai_barcode_scanner.svg)](https://pub.dev/packages/ai_barcode_scanner)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/juliansteenbakker?label=Sponsor%20Julian%20Steenbakker!)](https://github.com/sponsors/juliansteenbakker)
 
-### Screenshots 
+### Screenshots
 
 <table>
   <tr>
@@ -16,13 +16,12 @@
 </tr>
 </table>
 
-
 ## Features Supported
 
 See the example app for detailed implementation information.
 
 | Features               | Android            | iOS                | macOS | Web |
-|------------------------|--------------------|--------------------|-------|-----|
+| ---------------------- | ------------------ | ------------------ | ----- | --- |
 | analyzeImage (Gallery) | :heavy_check_mark: | :heavy_check_mark: | :x:   | :x: |
 | returnImage            | :heavy_check_mark: | :heavy_check_mark: | :x:   | :x: |
 | scanWindow             | :heavy_check_mark: | :heavy_check_mark: | :x:   | :x: |
@@ -31,19 +30,27 @@ See the example app for detailed implementation information.
 ## Platform Support
 
 | Android | iOS | macOS | Web | Linux | Windows |
-|---------|-----|-------|-----|-------|---------|
+| ------- | --- | ----- | --- | ----- | ------- |
 | ✔       | ✔   | ✔     | ✔   | :x:   | :x:     |
 
-
-
 ## Platform specific setup
+
 ### Android
-This packages uses the **bundled version** of MLKit Barcode-scanning for Android. This version is more accurate and immediately available to devices. However, this version will increase the size of the app with approximately 3 to 10 MB. The alternative for this is to use the **unbundled version** of MLKit Barcode-scanning for Android. This version is older than the bundled version however this only increases the size by around 600KB.
-To use this version you must alter the mobile_scanner gradle file to replace `com.google.mlkit:barcode-scanning:17.0.2` with `com.google.android.gms:play-services-mlkit-barcode-scanning:18.0.0`. Keep in mind that if you alter the gradle files directly in your project it can be overriden when you update your pubspec.yaml. I am still searching for a way to properly replace the module in gradle but have yet to find one.
+
+This package uses by default the **bundled version** of MLKit Barcode-scanning for Android. This version is immediately available to the device. But it will increase the size of the app by approximately 3 to 10 MB.
+
+The alternative is to use the **unbundled version** of MLKit Barcode-scanning for Android. This version is downloaded on first use via Google Play Services. It increases the app size by around 600KB.
 
 [You can read more about the difference between the two versions here.](https://developers.google.com/ml-kit/vision/barcode-scanning/android)
 
+To use the **unbundled version** of the MLKit Barcode-scanning, add the following line to your `/android/gradle.properties` file:
+
+```
+dev.steenbakker.mobile_scanner.useUnbundled=true
+```
+
 ### iOS
+
 **Add the following keys to your Info.plist file, located in <project root>/ios/Runner/Info.plist:**
 NSCameraUsageDescription - describe why your app needs access to the camera. This is called Privacy - Camera Usage Description in the visual editor.
 
@@ -51,24 +58,40 @@ NSCameraUsageDescription - describe why your app needs access to the camera. Thi
 NSPhotoLibraryUsageDescription - describe why your app needs permission for the photo library. This is called Privacy - Photo Library Usage Description in the visual editor.
 
 Example,
-  ```
-  <key>NSCameraUsageDescription</key>
-  <string>This app needs camera access to scan QR codes</string>
-  
-  <key>NSPhotoLibraryUsageDescription</key>
-  <string>This app needs photos access to get QR code from photo library</string>
-  ```
 
+```
+<key>NSCameraUsageDescription</key>
+<string>This app needs camera access to scan QR codes</string>
+
+<key>NSPhotoLibraryUsageDescription</key>
+<string>This app needs photos access to get QR code from photo library</string>
+```
 
 ### macOS
+
 Ensure that you granted camera permission in XCode -> Signing & Capabilities:
 
 <img width="696" alt="Screenshot of XCode where Camera is checked" src="https://user-images.githubusercontent.com/24459435/193464115-d76f81d0-6355-4cb2-8bee-538e413a3ad0.png">
 
 ## Web
-This package uses ZXing on web to read barcodes so it needs to be included in `index.html` as script.
-```html
-<script src="https://unpkg.com/@zxing/library@0.19.1" type="application/javascript"></script>
+
+As of version 5.0.0 adding the library to the `index.html` is no longer required,
+as the library is automatically loaded on first use.
+
+### Providing a mirror for the barcode scanning library
+
+If a different mirror is needed to load the barcode scanning library,
+the source URL can be set beforehand.
+
+```dart
+import 'package:flutter/foundation.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+
+final String scriptUrl = // ...
+
+if (kIsWeb) {
+  MobileScannerPlatform.instance.setBarcodeLibraryScriptUrl(scriptUrl);
+}
 ```
 
 ## Usage ([ai_barcode_scanner](https://pub.dev/packages/ai_barcode_scanner))
@@ -123,164 +146,89 @@ AiBarcodeScanner(
 
 ## Usage ([mobile_scanner](https://pub.dev/packages/mobile_scanner))
 
+Import the package with `package:mobile_scanner/mobile_scanner.dart`.
 
-## Usage
-
-Import `package:mobile_scanner/mobile_scanner.dart`, and use the widget with or without the controller.
-
-If you don't provide a controller, you can't control functions like the torch(flash) or switching camera.
-
-If you don't set `detectionSpeed` to `DetectionSpeed.noDuplicates`, you can get multiple scans in a very short time, causing things like pop() to fire lots of times.
-
-Example without controller:
+Create a new `MobileScannerController` controller, using the required options.
+Provide a `StreamSubscription` for the barcode events.
 
 ```dart
-import 'package:mobile_scanner/mobile_scanner.dart';
+final MobileScannerController controller = MobileScannerController(
+  // required options for the scanner
+);
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Mobile Scanner')),
-      body: MobileScanner(
-        // fit: BoxFit.contain,
-        onDetect: (capture) {
-          final List<Barcode> barcodes = capture.barcodes;
-          final Uint8List? image = capture.image;
-          for (final barcode in barcodes) {
-            debugPrint('Barcode found! ${barcode.rawValue}');
-          }
-        },
-      ),
-    );
-  }
+StreamSubscription<Object?>? _subscription;
 ```
 
-Example with controller and initial values:
+Ensure that your `State` class mixes in `WidgetsBindingObserver`, to handle lifecyle changes:
 
 ```dart
-import 'package:mobile_scanner/mobile_scanner.dart';
+class MyState extends State<MyStatefulWidget> with WidgetsBindingObserver {
+  // ...
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Mobile Scanner')),
-      body: MobileScanner(
-        // fit: BoxFit.contain,
-        controller: MobileScannerController(
-          detectionSpeed: DetectionSpeed.normal,
-          facing: CameraFacing.front,
-          torchEnabled: true,
-        ),
-        onDetect: (capture) {
-          final List<Barcode> barcodes = capture.barcodes;
-          final Uint8List? image = capture.image;
-          for (final barcode in barcodes) {
-            debugPrint('Barcode found! ${barcode.rawValue}');
-          }
-        },
-      ),
-    );
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // If the controller is not ready, do not try to start or stop it.
+    // Permission dialogs can trigger lifecycle changes before the controller is ready.
+    if (!controller.value.isInitialized) {
+      return;
+    }
+
+    switch (state) {
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+        return;
+      case AppLifecycleState.resumed:
+        // Restart the scanner when the app is resumed.
+        // Don't forget to resume listening to the barcode events.
+        _subscription = controller.barcodes.listen(_handleBarcode);
+
+        unawaited(controller.start());
+      case AppLifecycleState.inactive:
+        // Stop the scanner when the app is paused.
+        // Also stop the barcode events subscription.
+        unawaited(_subscription?.cancel());
+        _subscription = null;
+        unawaited(controller.stop());
+    }
   }
+
+  // ...
+}
 ```
 
-Example with controller and torch & camera controls:
+Then, start the scanner in `void initState()`:
 
 ```dart
-import 'package:mobile_scanner/mobile_scanner.dart';
+@override
+void initState() {
+  super.initState();
+  // Start listening to lifecycle changes.
+  WidgetsBinding.instance.addObserver(this);
 
-  MobileScannerController cameraController = MobileScannerController();
+  // Start listening to the barcode events.
+  _subscription = controller.barcodes.listen(_handleBarcode);
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Mobile Scanner'),
-          actions: [
-            IconButton(
-              color: Colors.white,
-              icon: ValueListenableBuilder(
-                valueListenable: cameraController.torchState,
-                builder: (context, state, child) {
-                  switch (state as TorchState) {
-                    case TorchState.off:
-                      return const Icon(Icons.flash_off, color: Colors.grey);
-                    case TorchState.on:
-                      return const Icon(Icons.flash_on, color: Colors.yellow);
-                  }
-                },
-              ),
-              iconSize: 32.0,
-              onPressed: () => cameraController.toggleTorch(),
-            ),
-            IconButton(
-              color: Colors.white,
-              icon: ValueListenableBuilder(
-                valueListenable: cameraController.cameraFacingState,
-                builder: (context, state, child) {
-                  switch (state as CameraFacing) {
-                    case CameraFacing.front:
-                      return const Icon(Icons.camera_front);
-                    case CameraFacing.back:
-                      return const Icon(Icons.camera_rear);
-                  }
-                },
-              ),
-              iconSize: 32.0,
-              onPressed: () => cameraController.switchCamera(),
-            ),
-          ],
-        ),
-        body: MobileScanner(
-          // fit: BoxFit.contain,
-          controller: cameraController,
-          onDetect: (capture) {
-            final List<Barcode> barcodes = capture.barcodes;
-            final Uint8List? image = capture.image;
-            for (final barcode in barcodes) {
-              debugPrint('Barcode found! ${barcode.rawValue}');
-            }
-          },
-        ),
-    );
-  }
+  // Finally, start the scanner itself.
+  unawaited(controller.start());
+}
 ```
 
-Example with controller and returning images
+Finally, dispose of the the `MobileScannerController` when you are done with it.
 
 ```dart
-import 'package:mobile_scanner/mobile_scanner.dart';
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Mobile Scanner')),
-      body: MobileScanner(
-        fit: BoxFit.contain,
-        controller: MobileScannerController(
-          // facing: CameraFacing.back,
-          // torchEnabled: false,
-          returnImage: true,
-        ),
-        onDetect: (capture) {
-          final List<Barcode> barcodes = capture.barcodes;
-          final Uint8List? image = capture.image;
-          for (final barcode in barcodes) {
-            debugPrint('Barcode found! ${barcode.rawValue}');
-          }
-          if (image != null) {
-            showDialog(
-              context: context,
-              builder: (context) =>
-                  Image(image: MemoryImage(image)),
-            );
-            Future.delayed(const Duration(seconds: 5), () {
-              Navigator.pop(context);
-            });
-          }
-        },
-      ),
-    );
-  }
+@override
+Future<void> dispose() async {
+  // Stop listening to lifecycle changes.
+  WidgetsBinding.instance.removeObserver(this);
+  // Stop listening to the barcode events.
+  unawaited(_subscription?.cancel());
+  _subscription = null;
+  // Dispose the widget itself.
+  super.dispose();
+  // Finally, dispose of the controller.
+  await controller.dispose();
+}
 ```
 
 ### BarcodeCapture
@@ -288,14 +236,14 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 The onDetect function returns a BarcodeCapture objects which contains the following items.
 
 | Property name | Type          | Description                       |
-|---------------|---------------|-----------------------------------|
+| ------------- | ------------- | --------------------------------- |
 | barcodes      | List<Barcode> | A list with scanned barcodes.     |
 | image         | Uint8List?    | If enabled, an image of the scan. |
 
 You can use the following properties of the Barcode object.
 
 | Property name | Type           | Description                         |
-|---------------|----------------|-------------------------------------|
+| ------------- | -------------- | ----------------------------------- |
 | format        | BarcodeFormat  |                                     |
 | rawBytes      | Uint8List?     | binary scan result                  |
 | rawValue      | String?        | Value if barcode is in UTF-8 format |
@@ -313,121 +261,180 @@ You can use the following properties of the Barcode object.
 
 ### Constructor parameters for [ai_barcode_scanner](https://pub.dev/packages/ai_barcode_scanner)
 
-```dart
-  /// Function that gets Called when barcode is scanned successfully
-///
-final void Function(String) onScan;
+````dart
+  /// Fit to screen
+  final BoxFit fit;
 
-/// Function that gets called when a Barcode is detected.
-///
-/// [barcode] The barcode object with all information about the scanned code.
-/// [args] Information about the state of the MobileScanner widget
-final void Function(BarcodeCapture)? onDetect;
+  /// Barcode controller (optional)
+  final MobileScannerController? controller;
 
-/// Validate barcode text with a function
-final bool Function(String value)? validator;
+  /// Show overlay or not (default: true)
+  final bool showOverlay;
 
-/// Fit to screen
-final BoxFit fit;
+  /// Overlay border color (default: white)
+  final Color? borderColor;
 
-/// Barcode controller (optional)
-final MobileScannerController? controller;
+  /// Overlay border width (default: 10)
+  final double borderWidth;
 
-/// Show overlay or not (default: true)
-final bool showOverlay;
+  /// Overlay color
+  final Color overlayColor;
 
-/// Overlay border color (default: white)
-final Color borderColor;
+  /// Overlay border radius (default: 10)
+  final double borderRadius;
 
-/// Overlay border width (default: 10)
-final double borderWidth;
+  /// Overlay border length (default: 30)
+  final double borderLength;
 
-/// Overlay color
-final Color overlayColor;
+  /// Overlay cut out width (optional)
+  final double? cutOutWidth;
 
-/// Overlay border radius (default: 10)
-final double borderRadius;
+  /// Overlay cut out height (optional)
+  final double? cutOutHeight;
 
-/// Overlay border length (default: 30)
-final double borderLength;
+  /// Overlay cut out offset (default: 0)
+  final double cutOutBottomOffset;
 
-/// Overlay cut out width (optional)
-final double? cutOutWidth;
+  /// Overlay cut out size (default: 300)
+  final double cutOutSize;
 
-/// Overlay cut out height (optional)
-final double? cutOutHeight;
+  /// Show error or not (default: true)
+  final bool showError;
 
-/// Overlay cut out offset (default: 0)
-final double cutOutBottomOffset;
+  /// Error color (default: red)
+  final Color errorColor;
 
-/// Overlay cut out size (default: 300)
-final double cutOutSize;
+  /// Show success or not (default: true)
+  final bool showSuccess;
 
-/// Hint widget (optional) (default: Text('Scan QR Code'))
-/// Hint widget will be replaced the bottom of the screen.
-/// If you want to replace the bottom screen widget, use [bottomBar]
-final Widget? bottomBar;
+  /// Success color (default: green)
+  final Color successColor;
 
-/// Hint text (default: 'Scan QR Code')
-final String bottomBarText;
+  /// The function that builds an error widget when the scanner
+  /// could not be started.
+  ///
+  /// If this is null, defaults to a black [ColoredBox]
+  /// with a centered white [Icons.error] icon.
+  final Widget Function(BuildContext, MobileScannerException, Widget?)?
+      errorBuilder;
 
-/// Hint text style
-final TextStyle bottomBarTextStyle;
+  /// The function that builds a placeholder widget when the scanner
+  /// is not yet displaying its camera preview.
+  ///
+  /// If this is null, a black [ColoredBox] is used as placeholder.
+  final Widget Function(BuildContext, Widget?)? placeholderBuilder;
 
-/// Show error or not (default: true)
-final bool showError;
+  /// Called when this object is removed from the tree permanently.
+  final void Function()? onDispose;
 
-/// Error color (default: red)
-final Color errorColor;
+  /// AppBar widget
+  /// you can use this to add appBar to the scanner screen
+  ///
+  final PreferredSizeWidget? appBar;
 
-/// Show success or not (default: true)
-final bool showSuccess;
+  /// The builder for the overlay above the camera preview.
+  ///
+  /// The resulting widget can be combined with the [scanWindow] rectangle
+  /// to create a cutout for the camera preview.
+  ///
+  /// The [BoxConstraints] for this builder
+  /// are the same constraints that are used to compute the effective [scanWindow].
+  ///
+  /// The overlay is only displayed when the camera preview is visible.
+  final LayoutWidgetBuilder? overlayBuilder;
 
-/// Success color (default: green)
-final Color successColor;
+  /// The scan window rectangle for the barcode scanner.
+  ///
+  /// If this is not null, the barcode scanner will only scan barcodes
+  /// which intersect this rectangle.
+  ///
+  /// This rectangle is relative to the layout size
+  /// of the *camera preview widget* in the widget tree,
+  /// rather than the actual size of the camera preview output.
+  /// This is because the size of the camera preview widget
+  /// might not be the same as the size of the camera output.
+  ///
+  /// For example, the applied [fit] has an effect on the size of the camera preview widget,
+  /// while the camera preview size remains the same.
+  ///
+  /// The following example shows a scan window that is centered,
+  /// fills half the height and one third of the width of the layout:
+  ///
+  /// ```dart
+  /// LayoutBuider(
+  ///   builder: (BuildContext context, BoxConstraints constraints) {
+  ///     final Size layoutSize = constraints.biggest;
+  ///
+  ///     final double scanWindowWidth = layoutSize.width / 3;
+  ///     final double scanWindowHeight = layoutSize.height / 2;
+  ///
+  ///     final Rect scanWindow = Rect.fromCenter(
+  ///       center: layoutSize.center(Offset.zero),
+  ///       width: scanWindowWidth,
+  ///       height: scanWindowHeight,
+  ///     );
+  ///   }
+  /// );
+  /// ```
+  final Rect? scanWindow;
 
-/// Can auto back to previous page when barcode is successfully scanned (default: true)
-final bool canPop;
+  /// The threshold for updates to the [scanWindow].
+  ///
+  /// If the [scanWindow] would be updated,
+  /// due to new layout constraints for the scanner,
+  /// and the width or height of the new scan window have not changed by this threshold,
+  /// then the scan window is not updated.
+  ///
+  /// It is recommended to set this threshold
+  /// if scan window updates cause performance issues.
+  ///
+  /// Defaults to no threshold for scan window updates.
+  ///
+  final void Function(BarcodeCapture)? onDetect;
 
-/// The function that builds an error widget when the scanner
-/// could not be started.
-///
-/// If this is null, defaults to a black [ColoredBox]
-/// with a centered white [Icons.error] icon.
-final Widget Function(BuildContext, MobileScannerException, Widget?)?
-errorBuilder;
+  /// The threshold for updates to the [scanWindow].
+  ///
+  /// If the [scanWindow] would be updated,
+  /// due to new layout constraints for the scanner,
+  /// and the width or height of the new scan window have not changed by this threshold,
+  /// then the scan window is not updated.
+  ///
+  /// It is recommended to set this threshold
+  /// if scan window updates cause performance issues.
+  ///
+  /// Defaults to no threshold for scan window updates.
+  final double scanWindowUpdateThreshold;
 
-/// The function that builds a placeholder widget when the scanner
-/// is not yet displaying its camera preview.
-///
-/// If this is null, a black [ColoredBox] is used as placeholder.
-final Widget Function(BuildContext, Widget?)? placeholderBuilder;
+  /// Validator function to check if barcode is valid or not
+  final bool Function(BarcodeCapture)? validator;
 
-/// The function that signals when the barcode scanner is started.
-final void Function(MobileScannerArguments?)? onScannerStarted;
+  final void Function(String?)? onImagePick;
 
-/// Called when this object is removed from the tree permanently.
-final void Function()? onDispose;
+  /// Title for the draggable sheet (default: 'Scan any QR code')
+  final String title;
 
-/// if set barcodes will only be scanned if they fall within this [Rect]
-/// useful for having a cut-out overlay for example. these [Rect]
-/// coordinates are relative to the widget size, so by how much your
-/// rectangle overlays the actual image can depend on things like the
-/// [BoxFit]
-final Rect? scanWindow;
+  /// Child widget for the draggable sheet (default: SizedBox.shrink())
+  final Widget child;
 
-/// Only set this to true if you are starting another instance of mobile_scanner
-/// right after disposing the first one, like in a PageView.
-///
-/// Default: false
-final bool? startDelay;
+  /// Hide drag handler of the draggable sheet (default: false)
+  final bool hideDragHandler;
 
-/// Appbar widget
-/// you can use this to add appbar to the scanner screen
-///
-final PreferredSizeWidget? appBar;
+  /// Hide title of the draggable sheet (default: false)
+  final bool hideTitle;
 
-```
+  /// Upload from gallery button alignment
+  /// default: bottom center, center, 0.75
+  final AlignmentGeometry? buttonAlignment;
+
+  /// actions for the app bar (optional)
+  /// Camera switch and torch toggle buttons are added by default
+  /// You can add more actions to the app bar using this parameter
+  final List<Widget>? actions;
+
+  /// Optional function to be called when clicking the back button on the app bar
+  /// If not provided, the default behavior is to pop the current route from the navigator
+  final void Function()? onPop;
+````
 
 ### Contributing to [ai_barcode_scanner](https://pub.dev/packages/ai_barcode_scanner)
 
