@@ -178,6 +178,9 @@ class AiBarcodeScanner extends StatefulWidget {
   /// You can add more actions to the app bar using this parameter
   final List<Widget>? actions;
 
+  /// Show button that allows the user to pick an image from the gallery or not (default: true)
+  final bool showGalleryButton;
+
   /// Optional function to be called when clicking the back button on the app bar
   /// If not provided, the default behavior is to pop the current route from the navigator
   final void Function()? onPop;
@@ -216,6 +219,7 @@ class AiBarcodeScanner extends StatefulWidget {
     this.buttonAlignment,
     this.actions,
     this.onPop,
+    this.showGalleryButton = true,
   });
 
   @override
@@ -279,7 +283,7 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                         : const Icon(Icons.flashlight_on_rounded),
                     onPressed: () => controller.toggleTorch(),
                   ),
-                  if (isLandscape)
+                  if (isLandscape && widget.showGalleryButton)
                     GalleryButton.icon(
                       onImagePick: widget.onImagePick,
                       onDetect: widget.onDetect,
@@ -344,7 +348,7 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                     );
                   },
                 ),
-              if (!isLandscape)
+              if (!isLandscape && widget.showGalleryButton)
                 Align(
                   alignment: widget.buttonAlignment ??
                       Alignment.lerp(
