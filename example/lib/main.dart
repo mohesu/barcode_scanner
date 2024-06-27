@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import 'package:ai_barcode_scanner/ai_barcode_scanner.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -45,18 +44,42 @@ class _HomePageState extends State<HomePage> {
                   MaterialPageRoute(
                     builder: (context) => AiBarcodeScanner(
                       onDispose: () {
+                        /// This is called when the barcode scanner is disposed.
+                        /// You can write your own logic here.
                         debugPrint("Barcode scanner disposed!");
                       },
                       controller: MobileScannerController(
                         detectionSpeed: DetectionSpeed.noDuplicates,
                       ),
-                      onDetect: (p0) => setState(() {
-                        barcode = p0.barcodes.first.rawValue.toString();
-                        log(barcode, name: 'Barcode');
-                      }),
-                      validator: (p0) =>
-                          p0.barcodes.first.rawValue?.startsWith('https://') ??
-                          false,
+                      onDetect: (BarcodeCapture capture) {
+                        /// The row string scanned barcode value
+                        final String? scannedValue =
+                            capture.barcodes.first.rawValue;
+                        debugPrint("Barcode scanned: $scannedValue");
+
+                        /// The `Uint8List` image is only available if `returnImage` is set to `true`.
+                        final Uint8List? image = capture.image;
+                        debugPrint("Barcode image: $image");
+
+                        /// row data of the barcode
+                        final Object? raw = capture.raw;
+                        debugPrint("Barcode raw: $raw");
+
+                        /// List of scanned barcodes if any
+                        final List<Barcode> barcodes = capture.barcodes;
+                        debugPrint("Barcode list: $barcodes");
+                      },
+                      validator: (value) {
+                        if (value.barcodes.isEmpty) {
+                          return false;
+                        }
+                        if (!(value.barcodes.first.rawValue
+                                ?.contains('flutter.dev') ??
+                            false)) {
+                          return false;
+                        }
+                        return true;
+                      },
                     ),
                   ),
                 );

@@ -169,6 +169,9 @@ class AiBarcodeScanner extends StatefulWidget {
   /// Hide title of the draggable sheet (default: false)
   final bool hideTitle;
 
+  /// Hide gallery button (default: false)
+  final bool hideGalleryButton;
+
   /// Upload from gallery button alignment
   /// default: bottom center, center, 0.75
   final AlignmentGeometry? buttonAlignment;
@@ -216,6 +219,7 @@ class AiBarcodeScanner extends StatefulWidget {
     this.buttonAlignment,
     this.actions,
     this.onPop,
+    this.hideGalleryButton = false,
   });
 
   @override
@@ -279,7 +283,7 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                         : const Icon(Icons.flashlight_on_rounded),
                     onPressed: () => controller.toggleTorch(),
                   ),
-                  if (isLandscape)
+                  if (isLandscape || !widget.hideGalleryButton)
                     GalleryButton.icon(
                       onImagePick: widget.onImagePick,
                       onDetect: widget.onDetect,

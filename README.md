@@ -107,9 +107,6 @@ import 'package:ai_barcode_scanner/ai_barcode_scanner.dart';
 
 /// Simple example of using the barcode scanner.
 AiBarcodeScanner(
-        onScan: (String value) {
-          debugPrint(value);
-        },
         onDetect: (BarcodeCapture barcodeCapture) {
           debugPrint(barcodeCapture);
         },
@@ -120,9 +117,6 @@ AiBarcodeScanner(
         controller: MobileScannerController(
              detectionSpeed: DetectionSpeed.noDuplicates,
            ),
-          onScan: (String value) {
-            debugPrint(value);
-          },
         onDetect: (BarcodeCapture barcodeCapture) {
           debugPrint(barcodeCapture);
         },
@@ -132,16 +126,40 @@ AiBarcodeScanner(
 /// Validator works on the raw string, not the decoded value.
 /// If you want to validate the scanner, use the [validate] parameter.
 AiBarcodeScanner(
-        validate: (String value) {
-          if(value.startsWith('http')) {
-            return true;
-          }
-          return false;
-        },
-          onScan: (String value) {
-            debugPrint(value);
-          },
-      ),
+  onDispose: () {
+    /// This is called when the barcode scanner is disposed.
+    /// You can write your own logic here.
+    debugPrint("Barcode scanner disposed!");
+  },
+  controller: MobileScannerController(
+    detectionSpeed: DetectionSpeed.noDuplicates,
+  ),
+  onDetect: (BarcodeCapture capture) {
+    /// The row string scanned barcode value
+    final String? scannedValue =
+        capture.barcodes.first.rawValue;
+
+    /// The `Uint8List` image is only available if `returnImage` is set to `true`.
+    final Uint8List? image = capture.image;
+
+    /// row data of the barcode
+    final Object? raw = capture.raw;
+
+    /// List of scanned barcodes if any
+    final List<Barcode> barcodes = capture.barcodes;
+  },
+  validator: (value) {
+    if (value.barcodes.isEmpty) {
+      return false;
+    }
+    if (!(value.barcodes.first.rawValue
+            ?.contains('flutter.dev') ??
+        false)) {
+      return false;
+    }
+    return true;
+  },
+),
 ```
 
 ## Usage ([mobile_scanner](https://pub.dev/packages/mobile_scanner))
