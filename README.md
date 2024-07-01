@@ -286,8 +286,11 @@ You can use the following properties of the Barcode object.
   /// Barcode controller (optional)
   final MobileScannerController? controller;
 
-  /// Show overlay or not (default: true)
-  final bool showOverlay;
+  /// You can use your own custom overlay builder
+  /// to build your own overlay
+  /// This will override the default custom overlay
+  final Widget? Function(BuildContext, bool?, MobileScannerController)?
+      customOverlayBuilder;
 
   /// Overlay border color (default: white)
   final Color? borderColor;
@@ -348,7 +351,14 @@ You can use the following properties of the Barcode object.
   /// AppBar widget
   /// you can use this to add appBar to the scanner screen
   ///
-  final PreferredSizeWidget? appBar;
+  final PreferredSizeWidget? Function(
+      BuildContext context, MobileScannerController controller)? appBarBuilder;
+
+  /// The builder for the bottom sheet.
+  /// This is displayed below the camera preview.
+  final Widget? Function(
+          BuildContext context, MobileScannerController controller)?
+      bottomSheetBuilder;
 
   /// The builder for the overlay above the camera preview.
   ///
@@ -429,29 +439,36 @@ You can use the following properties of the Barcode object.
   final void Function(String?)? onImagePick;
 
   /// Title for the draggable sheet (default: 'Scan any QR code')
-  final String title;
+  final String sheetTitle;
 
   /// Child widget for the draggable sheet (default: SizedBox.shrink())
-  final Widget child;
+  final Widget sheetChild;
 
   /// Hide drag handler of the draggable sheet (default: false)
-  final bool hideDragHandler;
+  final bool hideSheetDragHandler;
 
   /// Hide title of the draggable sheet (default: false)
-  final bool hideTitle;
+  final bool hideSheetTitle;
+
+  /// Hide gallery button (default: false)
+  /// This will hide the gallery button at the bottom of the screen
+  final bool hideGalleryButton;
+
+  /// Hide gallery icon (default: false)
+  /// This will hide the gallery icon in the app bar
+  final bool hideGalleryIcon;
+
+  /// Extend body behind app bar (default: true)
+  final bool extendBodyBehindAppBar;
 
   /// Upload from gallery button alignment
   /// default: bottom center, center, 0.75
-  final AlignmentGeometry? buttonAlignment;
+  final AlignmentGeometry? galleryButtonAlignment;
 
   /// actions for the app bar (optional)
   /// Camera switch and torch toggle buttons are added by default
   /// You can add more actions to the app bar using this parameter
   final List<Widget>? actions;
-
-  /// Optional function to be called when clicking the back button on the app bar
-  /// If not provided, the default behavior is to pop the current route from the navigator
-  final void Function()? onPop;
 ````
 
 ### Contributing to [ai_barcode_scanner](https://pub.dev/packages/ai_barcode_scanner)

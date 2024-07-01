@@ -44,7 +44,10 @@ class DraggableSheet extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 const Divider(),

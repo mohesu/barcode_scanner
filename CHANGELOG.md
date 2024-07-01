@@ -1,6 +1,11 @@
 ## 5.1.1+1
 
 - Readme updated
+- gallery button hide option fixed
+
+## 5.1.1+1
+
+- Readme updated
 - gallery button hide option added
 
 ## 5.1.1

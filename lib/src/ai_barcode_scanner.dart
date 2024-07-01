@@ -15,8 +15,11 @@ class AiBarcodeScanner extends StatefulWidget {
   /// Barcode controller (optional)
   final MobileScannerController? controller;
 
-  /// Show overlay or not (default: true)
-  final bool showOverlay;
+  /// You can use your own custom overlay builder
+  /// to build your own overlay
+  /// This will override the default custom overlay
+  final Widget? Function(BuildContext, bool?, MobileScannerController)?
+      customOverlayBuilder;
 
   /// Overlay border color (default: white)
   final Color? borderColor;
@@ -77,7 +80,14 @@ class AiBarcodeScanner extends StatefulWidget {
   /// AppBar widget
   /// you can use this to add appBar to the scanner screen
   ///
-  final PreferredSizeWidget? appBar;
+  final PreferredSizeWidget? Function(
+      BuildContext context, MobileScannerController controller)? appBarBuilder;
+
+  /// The builder for the bottom sheet.
+  /// This is displayed below the camera preview.
+  final Widget? Function(
+          BuildContext context, MobileScannerController controller)?
+      bottomSheetBuilder;
 
   /// The builder for the overlay above the camera preview.
   ///
@@ -158,32 +168,36 @@ class AiBarcodeScanner extends StatefulWidget {
   final void Function(String?)? onImagePick;
 
   /// Title for the draggable sheet (default: 'Scan any QR code')
-  final String title;
+  final String sheetTitle;
 
   /// Child widget for the draggable sheet (default: SizedBox.shrink())
-  final Widget child;
+  final Widget sheetChild;
 
   /// Hide drag handler of the draggable sheet (default: false)
-  final bool hideDragHandler;
+  final bool hideSheetDragHandler;
 
   /// Hide title of the draggable sheet (default: false)
-  final bool hideTitle;
+  final bool hideSheetTitle;
 
   /// Hide gallery button (default: false)
+  /// This will hide the gallery button at the bottom of the screen
   final bool hideGalleryButton;
+
+  /// Hide gallery icon (default: false)
+  /// This will hide the gallery icon in the app bar
+  final bool hideGalleryIcon;
+
+  /// Extend body behind app bar (default: true)
+  final bool extendBodyBehindAppBar;
 
   /// Upload from gallery button alignment
   /// default: bottom center, center, 0.75
-  final AlignmentGeometry? buttonAlignment;
+  final AlignmentGeometry? galleryButtonAlignment;
 
   /// actions for the app bar (optional)
   /// Camera switch and torch toggle buttons are added by default
   /// You can add more actions to the app bar using this parameter
   final List<Widget>? actions;
-
-  /// Optional function to be called when clicking the back button on the app bar
-  /// If not provided, the default behavior is to pop the current route from the navigator
-  final void Function()? onPop;
   const AiBarcodeScanner({
     super.key,
     this.fit = BoxFit.cover,
@@ -195,10 +209,10 @@ class AiBarcodeScanner extends StatefulWidget {
     this.overlayColor = const Color.fromRGBO(0, 0, 0, 82),
     this.borderRadius = 24,
     this.borderLength = 42,
-    this.cutOutSize = 352,
-    this.cutOutBottomOffset = 124,
+    this.cutOutSize = 320,
+    this.cutOutBottomOffset = 110,
     this.scanWindowUpdateThreshold = 0.0,
-    this.showOverlay = true,
+    this.customOverlayBuilder,
     this.showError = true,
     this.showSuccess = true,
     this.errorColor = Colors.red,
@@ -207,19 +221,21 @@ class AiBarcodeScanner extends StatefulWidget {
     this.placeholderBuilder,
     this.onDispose,
     this.scanWindow,
-    this.appBar,
+    this.appBarBuilder,
     this.overlayBuilder,
     this.onDetect,
     this.validator,
     this.onImagePick,
-    this.title = 'Scan any QR code',
-    this.child = const SizedBox.shrink(),
-    this.hideDragHandler = false,
-    this.hideTitle = false,
-    this.buttonAlignment,
+    this.sheetTitle = 'Scan any QR code',
+    this.sheetChild = const SizedBox.shrink(),
+    this.hideSheetDragHandler = false,
+    this.hideSheetTitle = false,
+    this.galleryButtonAlignment,
     this.actions,
-    this.onPop,
     this.hideGalleryButton = false,
+    this.hideGalleryIcon = true,
+    this.bottomSheetBuilder,
+    this.extendBodyBehindAppBar = true,
   });
 
   @override
@@ -252,122 +268,110 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
 
   @override
   Widget build(BuildContext context) {
-    return OrientationBuilder(
-      builder: (context, orientation) {
-        final isLandscape = orientation == Orientation.landscape;
-        if (isLandscape) {
-          _cutOutBottomOffset = 0;
-        } else {
-          _cutOutBottomOffset = widget.cutOutBottomOffset;
-        }
-        return Scaffold(
-          appBar: widget.appBar ??
-              AppBar(
-                leading: Navigator.canPop(context)
-                    ? IconButton(
-                        icon: const Icon(Icons.close_rounded),
-                        onPressed: widget.onPop ?? () => Navigator.pop(context),
-                      )
-                    : null,
-                backgroundColor: Colors.transparent,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.cameraswitch_rounded),
-                    onPressed: () => controller.switchCamera(),
-                  ),
-                  IconButton(
-                    icon: controller.torchEnabled
-                        ? const Icon(Icons.flashlight_off_rounded)
-                        : const Icon(Icons.flashlight_on_rounded),
-                    onPressed: () => controller.toggleTorch(),
-                  ),
-                  if (isLandscape || !widget.hideGalleryButton)
-                    GalleryButton.icon(
-                      onImagePick: widget.onImagePick,
-                      onDetect: widget.onDetect,
-                      validator: widget.validator,
-                      controller: controller,
-                      isSuccess: _isSuccess,
-                    ),
-                  ...?widget.actions,
-                ],
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    return Scaffold(
+      appBar: widget.appBarBuilder?.call(context, controller) ??
+          AppBar(
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.cameraswitch_rounded),
+                onPressed: controller.switchCamera,
               ),
-          extendBodyBehindAppBar: true,
-          bottomSheet: isLandscape
-              ? null
-              : DraggableSheet(
-                  title: widget.title,
-                  hideDragHandler: widget.hideDragHandler,
-                  hideTitle: widget.hideTitle,
-                  child: widget.child,
-                ),
-          body: Stack(
-            children: [
-              MobileScanner(
-                onDetect: onDetect,
-                controller: controller,
-                fit: widget.fit,
-                errorBuilder: widget.errorBuilder ??
-                    (_, error, ___) => const ErrorBuilder(),
-                placeholderBuilder: widget.placeholderBuilder,
-                scanWindow: widget.scanWindow,
-                key: widget.key,
-                overlayBuilder: widget.overlayBuilder,
-                scanWindowUpdateThreshold: widget.scanWindowUpdateThreshold,
+              IconButton(
+                icon: controller.torchEnabled
+                    ? const Icon(Icons.flashlight_off_rounded)
+                    : const Icon(Icons.flashlight_on_rounded),
+                onPressed: controller.toggleTorch,
               ),
-              if (widget.showOverlay)
-                ValueListenableBuilder<bool?>(
-                  valueListenable: _isSuccess,
-                  builder: (context, isSuccess, __) {
-                    return Container(
-                      decoration: ShapeDecoration(
-                        shape: OverlayShape(
-                          borderRadius: widget.borderRadius,
-                          borderColor:
-                              ((isSuccess ?? false) && widget.showSuccess)
-                                  ? widget.successColor
-                                  : (!(isSuccess ?? true) && widget.showError)
-                                      ? widget.errorColor
-                                      : widget.borderColor ?? Colors.white,
-                          borderLength: widget.borderLength,
-                          borderWidth: widget.borderWidth,
-                          cutOutSize: widget.cutOutSize,
-                          cutOutBottomOffset: _cutOutBottomOffset,
-                          cutOutWidth: widget.cutOutWidth,
-                          cutOutHeight: widget.cutOutHeight,
-                          overlayColor:
-                              ((isSuccess ?? false) && widget.showSuccess)
-                                  ? widget.successColor.withOpacity(0.4)
-                                  : (!(isSuccess ?? true) && widget.showError)
-                                      ? widget.errorColor.withOpacity(0.4)
-                                      : widget.overlayColor,
-                        ),
-                      ),
-                    );
-                  },
+              if (!widget.hideGalleryIcon)
+                GalleryButton.icon(
+                  onImagePick: widget.onImagePick,
+                  onDetect: widget.onDetect,
+                  validator: widget.validator,
+                  controller: controller,
+                  isSuccess: _isSuccess,
                 ),
-              if (!isLandscape)
-                Align(
-                  alignment: widget.buttonAlignment ??
-                      Alignment.lerp(
-                        Alignment.bottomCenter,
-                        Alignment.center,
-                        0.75,
-                      )!,
-                  child: GalleryButton(
-                    onImagePick: widget.onImagePick,
-                    onDetect: widget.onDetect,
-                    validator: widget.validator,
-                    controller: controller,
-                    isSuccess: _isSuccess,
-                  ),
-                ),
+              ...?widget.actions,
             ],
           ),
-        );
-      },
+      extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+      bottomSheet: widget.bottomSheetBuilder?.call(context, controller) ??
+          DraggableSheet(
+            title: widget.sheetTitle,
+            hideDragHandler: widget.hideSheetDragHandler,
+            hideTitle: widget.hideSheetTitle,
+            child: widget.sheetChild,
+          ),
+      body: Stack(
+        children: [
+          MobileScanner(
+            onDetect: onDetect,
+            controller: controller,
+            fit: widget.fit,
+            errorBuilder:
+                widget.errorBuilder ?? (_, error, ___) => const ErrorBuilder(),
+            placeholderBuilder: widget.placeholderBuilder,
+            scanWindow: widget.scanWindow,
+            key: widget.key,
+            overlayBuilder: widget.overlayBuilder,
+            scanWindowUpdateThreshold: widget.scanWindowUpdateThreshold,
+          ),
+          ValueListenableBuilder<bool?>(
+            valueListenable: _isSuccess,
+            builder: (context, isSuccess, __) {
+              return widget.customOverlayBuilder
+                      ?.call(context, isSuccess, controller) ??
+                  Container(
+                    decoration: ShapeDecoration(
+                      shape: OverlayShape(
+                        borderRadius: widget.borderRadius,
+                        borderColor:
+                            ((isSuccess ?? false) && widget.showSuccess)
+                                ? widget.successColor
+                                : (!(isSuccess ?? true) && widget.showError)
+                                    ? widget.errorColor
+                                    : widget.borderColor ?? Colors.white,
+                        borderLength: widget.borderLength,
+                        borderWidth: widget.borderWidth,
+                        cutOutSize: widget.cutOutSize,
+                        cutOutBottomOffset: _cutOutBottomOffset,
+                        cutOutWidth: widget.cutOutWidth,
+                        cutOutHeight: widget.cutOutHeight,
+                        overlayColor:
+                            ((isSuccess ?? false) && widget.showSuccess)
+                                ? widget.successColor.withOpacity(0.4)
+                                : (!(isSuccess ?? true) && widget.showError)
+                                    ? widget.errorColor.withOpacity(0.4)
+                                    : widget.overlayColor,
+                      ),
+                    ),
+                  );
+            },
+          ),
+          if (!widget.hideGalleryButton)
+            Align(
+              alignment: widget.galleryButtonAlignment ??
+                  Alignment.lerp(
+                    Alignment.bottomCenter,
+                    Alignment.center,
+                    0.75,
+                  )!,
+              child: GalleryButton(
+                onImagePick: widget.onImagePick,
+                onDetect: widget.onDetect,
+                validator: widget.validator,
+                controller: controller,
+                isSuccess: _isSuccess,
+              ),
+            ),
+        ],
+      ),
     );
   }
 
