@@ -1,3 +1,7 @@
+## 5.2.1
+
+- dependency updates
+
 ## 5.1.1+1
 
 - Readme updated
