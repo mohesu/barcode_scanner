@@ -1,11 +1,10 @@
-## 5.2.1
+## 5.2.2
 
 - dependency updates
 
-## 5.1.1+1
+## 5.2.1
 
-- Readme updated
-- gallery button hide option fixed
+- dependency updates
 
 ## 5.1.1+1
 
