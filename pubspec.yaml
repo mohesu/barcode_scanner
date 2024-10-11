@@ -1,6 +1,6 @@
 name: ai_barcode_scanner
 description: A universal AI barcode and QR code scanner for Flutter based on MLKit. Uses CameraX on Android, AVFoundation on iOS and Apple Vision & AVFoundation on macOS.
-version: 5.2.2
+version: 6.0.0
 homepage: https://mohesu.com
 repository: https://github.com/mohesu/barcode_scanner.git
 issue_tracker: https://github.com/mohesu/barcode_scanner/issues
@@ -23,7 +23,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  mobile_scanner: ^5.2.3
+  mobile_scanner: ^6.0.1
   image_picker: ^1.1.2
 
 dev_dependencies:

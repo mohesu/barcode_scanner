@@ -16,6 +16,12 @@
 </tr>
 </table>
 
+## Platform Support
+
+| Android | iOS | macOS | Web | Linux | Windows |
+| ------- | --- | ----- | --- | ----- | ------- |
+| ✔       | ✔   | ✔     | ✔   | :x:   | :x:     |
+
 ## Features Supported
 
 See the example app for detailed implementation information.
@@ -26,12 +32,6 @@ See the example app for detailed implementation information.
 | returnImage            | :heavy_check_mark: | :heavy_check_mark: | :x:   | :x: |
 | scanWindow             | :heavy_check_mark: | :heavy_check_mark: | :x:   | :x: |
 | barcodeOverlay         | :heavy_check_mark: | :heavy_check_mark: | :x:   | :x: |
-
-## Platform Support
-
-| Android | iOS | macOS | Web | Linux | Windows |
-| ------- | --- | ----- | --- | ----- | ------- |
-| ✔       | ✔   | ✔     | ✔   | :x:   | :x:     |
 
 ## Platform specific setup
 
@@ -75,8 +75,8 @@ Ensure that you granted camera permission in XCode -> Signing & Capabilities:
 
 ## Web
 
-As of version 5.0.0 adding the library to the `index.html` is no longer required,
-as the library is automatically loaded on first use.
+As of version 5.0.0 adding the barcode scanning library script to the `index.html` is no longer required,
+as the script is automatically loaded on first use.
 
 ### Providing a mirror for the barcode scanning library
 

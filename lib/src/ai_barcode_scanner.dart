@@ -198,6 +198,8 @@ class AiBarcodeScanner extends StatefulWidget {
   /// Camera switch and torch toggle buttons are added by default
   /// You can add more actions to the app bar using this parameter
   final List<Widget>? actions;
+
+  final bool setPortraitOrientation;
   const AiBarcodeScanner({
     super.key,
     this.fit = BoxFit.cover,
@@ -236,6 +238,7 @@ class AiBarcodeScanner extends StatefulWidget {
     this.hideGalleryIcon = true,
     this.bottomSheetBuilder,
     this.extendBodyBehindAppBar = true,
+    this.setPortraitOrientation = true,
   });
 
   @override
@@ -260,18 +263,20 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
 
   @override
   void dispose() {
-    controller.dispose();
-    widget.controller?.dispose();
+    // controller.dispose();
+    // widget.controller?.dispose();
     widget.onDispose?.call();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+    if (widget.setPortraitOrientation) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+    }
     return Scaffold(
       appBar: widget.appBarBuilder?.call(context, controller) ??
           AppBar(

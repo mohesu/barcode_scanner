@@ -1,3 +1,11 @@
+## 6.0.0
+
+- Dependency updates
+- mobile_scanner: ^6.0.1
+- setPortraitOrientation bool added. Now you can set the orientation.
+
+- dependency updates
+
 ## 5.2.2
 
 - dependency updates
