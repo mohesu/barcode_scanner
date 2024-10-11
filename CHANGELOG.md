@@ -1,10 +1,41 @@
+## 6.0.1
+
+**BREAKING CHANGES BY [MOBILE_SCANNER](https://pub.dev/packages/mobile_scanner):**
+
+```
+- [iOS] iOS 15.5.0 is now the minimum supported iOS version.
+- [iOS] Updates MLKit to version 7.0.0.
+- [iOS] Updates the minimum supported XCode version to 15.3.0.
+
+Improvements:
+
+- [MacOS] Added the corners and size information to barcode results.
+- [MacOS] Added support for `analyzeImage`.
+- [MacOS] Added a Privacy Manifest.
+- [web] Added the size information to barcode results.
+- [web] Added the video output size information to barcode capture.
+- Added support for barcode formats to image analysis.
+- Updated the scanner to report any scanning errors that were encountered during processing.
+- Introduced a new getter `hasCameraPermission` for the `MobileScannerState`.
+- Fixed a bug in the lifecycle handling sample. Now instead of checking `isInitialized`,
+  the sample recommends using `hasCameraPermission`, which also guards against camera permission errors.
+- Updated the behavior of `returnImage` to only determine if the camera output bytes should be sent.
+- Updated the behavior of `BarcodeCapture.size` to always be provided when available, regardless of `returnImage`.
+- [iOS] Excluded the `armv7` architecture, which is unsupported by MLKit 7.0.0.
+- Added a new `onDetectError` error handler to the `MobileScanner` widget, for use with `onDetect`.
+
+Bugs fixed:
+
+- Fixed a bug that would cause the scanner to emit an error when it was already started. Now it ignores any calls to start while it is starting.
+- [MacOS] Fixed a bug that prevented the `anaylzeImage()` sample from working properly.
+- Fixed a bug that would cause onDetect to not handle errors.
+```
+
 ## 6.0.0
 
 - Dependency updates
 - mobile_scanner: ^6.0.1
 - setPortraitOrientation bool added. Now you can set the orientation.
-
-- dependency updates
 
 ## 5.2.2
 
