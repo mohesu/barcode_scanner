@@ -100,7 +100,7 @@ Import `package:ai_barcode_scanner/ai_barcode_scanner.dart`, and use the widget 
 
 If you don't provide a controller, you can't control functions like the torch(flash) or switching camera.
 
-If you don't set allowDuplicates to false, you can get multiple scans in a very short time, causing things like pop() to fire lots of times.
+If you don't set `detectionSpeed: DetectionSpeed.noDuplicates`, you can get multiple scans in a very short time.
 
 ```dart
 import 'package:ai_barcode_scanner/ai_barcode_scanner.dart';
