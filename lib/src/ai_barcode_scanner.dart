@@ -288,11 +288,15 @@ class _AiBarcodeScannerState extends State<AiBarcodeScanner> {
                 icon: const Icon(Icons.cameraswitch_rounded),
                 onPressed: controller.switchCamera,
               ),
+              
               IconButton(
-                icon: controller.torchEnabled
+                icon: controller.value.torchState == TorchState.on
                     ? const Icon(Icons.flashlight_off_rounded)
                     : const Icon(Icons.flashlight_on_rounded),
-                onPressed: controller.toggleTorch,
+                onPressed: (){
+                  controller.toggleTorch();
+                  setState(() {});
+                }
               ),
               if (!widget.hideGalleryIcon)
                 GalleryButton.icon(
